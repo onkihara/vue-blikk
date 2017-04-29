@@ -1,0 +1,1 @@
+npm run build && copy /Y .\dist\vue-blikk.js ..\geo\resources\assets\js\libs
