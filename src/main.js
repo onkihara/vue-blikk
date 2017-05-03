@@ -3,11 +3,10 @@ import _ from 'lodash'
 import Vue from 'vue'
 
 import SlideawayExample from './examples/SlideawayExample.vue'
+import EditlineExample from './examples/EditlineExample.vue'
 
-
-//Vue.component('slide-away',Slideaway);
 
 new Vue({
   el: '#app',
-  render: h => h(SlideawayExample)
+  render: h => h(EditlineExample)
 })
