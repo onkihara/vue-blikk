@@ -1,5 +1,5 @@
 <template>
-    <span :class="status" :style="[styleerror, styledone]" class="edit-area">
+    <span :class="status" :style="[styleerror, styledone]" class="edit-typeahead">
     
         <span ref="text" v-if="!editmode">
             <slot></slot>
@@ -9,13 +9,23 @@
             <slot name="editicon"><span class="editicon">[edit]</span></slot>
         </a>
 
-        <textarea 
+        <typeahead 
             ref="input" 
             v-if="editmode" 
             @blur="leave" 
+            @keydown.enter.stop="leave"
+            @reset="reset"
             @keydown.esc.stop="reset"
-            v-model="val" 
-        ></textarea>
+            v-model="val"
+            :async="async"
+            :data="data"
+            :asyncKey="asyncKey"
+            :limit="limit"
+            :matchCase="matchCase"
+            :matchStart="matchStart"
+            :onHit="onHit"
+            :template="template"
+        ></typeahead>
 
     </span>
 </template>
@@ -24,6 +34,7 @@
 
     import Axios from 'axios';
     import _ from 'lodash';
+    import Typeahead from './Typeahead.vue';
 
     const DELAY = 1000;
     const COLOR_ERROR = '#dab0c7';
@@ -31,21 +42,35 @@
 
     export default {
 
+        components : {
+            typeahead : Typeahead
+        },
+
         props : {
             name : { type : String, default : 'name' },
             href : { type : String, default : '' },
             delay : { type : Number, default : DELAY },
-            value : { type : String },
-            br : { type : Boolean, default: false }, // beware line-breaks <br />
             colorerror : { type : String, default : COLOR_ERROR },
             colordone : { type : String, default : COLOR_DONE },
             callbackdone : { type : Function, default : function(message) { console.log(message); }},
-            callbackerror : { type : Function, default : function(error) { console.log(error); }}
-        },
+            callbackerror : { type : Function, default : function(error) { console.log(error); }},
+            // typeahead-props
+            async: {type: String},
+            data: {type: Array},
+            asyncKey: {type: String, default: null},
+            limit: {type: Number, default: 8},
+            matchCase: {type: Boolean, default: false},
+            matchStart: {type: Boolean, default: false},
+            onHit: {
+              type: Function,
+              default (item) { return item }
+            },
+            template: {type: String},
+         },
 
         data : function() {
             return {
-                val : this.value,
+                val : '',
                 old : '',
                 text : '',
                 editmode : false,
@@ -57,21 +82,13 @@
         },
 
         mounted : function() {
-            if (this.br) {
-                this.val = this.old = this.$refs.text.innerHTML.trim()
-                    .replace(/<br\s?\/?>(\n\r|\r\n|\r|\n)?/g,'\n');
-            } else {
-                this.val = this.old = this.$refs.text.textContent.trim();
-            }
-            // adjust height
-            this.height = this.$refs.text.offsetHeight;
+            this.val = this.old = this.$refs.text.textContent.trim();
         },
 
         methods : {
             edit : function() {
                 this.editmode = true;
                 this.$nextTick(function() {
-                    this.$refs.input.style.minHeight = this.height + 'px';
                     this.$refs.input.focus();
                 });
             },
@@ -146,7 +163,7 @@
 
 <style lang="scss">
 
-    .edit-area {
+    .edit-typeahead {
 
         transition: background-color 0.5s;
         background-color:transparent;
@@ -162,7 +179,7 @@
             cursor:pointer;
         }
 
-        textarea {
+        input {
             width:100%;
             height:100%;
             font-family:inherit;

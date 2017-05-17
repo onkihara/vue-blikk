@@ -3,7 +3,9 @@
     <h1>{{ msg }}</h1>
 
 	<h1><edit-area name="title" href="http://localhost:8080" colorerror="red" :br="true">
-		Lorem ipsum dolor sit amet, consectetur adipisicing elit. Id magnam aliquid rerum ipsa quas doloremque totam eum quod necessitatibus, reprehenderit eligendi, rem tempora dolore dolorem praesentium, <br /><br />dicta, nostrum similique blanditiis! Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ratione nobis unde adipisci vel repellat officiis magni sequi quisquam necessitatibus facere odio hic, blanditiis quae consequuntur, atque eaque voluptates eius enim.
+		Lorem ipsum dolor sit amet, consectetur adipisicing elit. Id magnam aliquid rerum ipsa quas doloremque totam eum quod necessitatibus, reprehenderit eligendi, rem tempora dolore dolorem praesentium,<br />
+		<br />
+		dicta, nostrum similique blanditiis! Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ratione nobis unde adipisci vel repellat officiis magni sequi quisquam necessitatibus facere odio hic, blanditiis quae consequuntur, atque eaque voluptates eius enim.
 	</edit-area></h1>
 
 	<hr />
