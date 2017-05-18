@@ -4,8 +4,8 @@
 
 	<hr />
 
-	<h1><edit-typeahead name="title" href="http://localhost:8080" :data="daten" colorerror="red">
-		vier
+	<h1><edit-typeahead name="title" href="http://localhost:8080" :data="daten" colorerror="red" :allow-new="true" :debug="true">
+		drei
 	</edit-typeahead></h1>
 
   </div>

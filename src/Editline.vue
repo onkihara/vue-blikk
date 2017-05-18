@@ -56,7 +56,7 @@
         },
 
         mounted : function() {
-            this.val = this.old = this.$refs.text.textContent;
+            this.val = this.old = this.$refs.text.textContent.trim();
         },
 
         methods : {

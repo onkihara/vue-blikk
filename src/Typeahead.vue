@@ -25,7 +25,8 @@
 
 <script>
 
-var DELAY = 300
+const DELAY = 300
+const LIMIT = 8
 
 export default {
   props: {
@@ -34,9 +35,10 @@ export default {
     delay: {type: Number, default: DELAY},
     asyncKey: {type: String, default: null},
     id: {type: String},
-    limit: {type: Number, default: 8},
+    limit: {type: Number, default: LIMIT},
     matchCase: {type: Boolean, default: false},
     matchStart: {type: Boolean, default: false},
+    allowNew : {type: Boolean, default: false},
     name: {type: String},
     onHit: {
       type: Function,
@@ -104,7 +106,11 @@ export default {
     isActive (index) { return this.current === index },
     hit (e) {
       e.preventDefault()
-      this.setValue(this.onHit(this.items[this.current], this))
+      if (this.allowNew && !this.showDropdown && this.val) {
+        this.setValue(this.onHit(this.val,this))
+      } else {
+        this.setValue(this.onHit(this.items[this.current], this))
+      }
       this.$nextTick(function() {
         this.$emit('blur')
       });

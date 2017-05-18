@@ -13,17 +13,18 @@
             ref="input" 
             v-if="editmode" 
             @blur="leave" 
-            @keydown.enter.stop="leave"
             @reset="reset"
             @keydown.esc.stop="reset"
             v-model="val"
             :async="async"
             :data="data"
-            :asyncKey="asyncKey"
+            :async-key="asyncKey"
             :limit="limit"
-            :matchCase="matchCase"
-            :matchStart="matchStart"
-            :onHit="onHit"
+            :delay="delay"
+            :match-case="matchCase"
+            :match-start="matchStart"
+            :allow-new="allowNew"
+            :on-hit="onHit"
             :template="template"
         ></typeahead>
 
@@ -36,7 +37,8 @@
     import _ from 'lodash';
     import Typeahead from './Typeahead.vue';
 
-    const DELAY = 1000;
+    const DELAY = 300;
+    const FBDELAY = 1000;
     const COLOR_ERROR = '#dab0c7';
     const COLOR_DONE = '#b0dac2';
 
@@ -49,7 +51,7 @@
         props : {
             name : { type : String, default : 'name' },
             href : { type : String, default : '' },
-            delay : { type : Number, default : DELAY },
+            fbdelay : { type : Number, default : FBDELAY },
             colorerror : { type : String, default : COLOR_ERROR },
             colordone : { type : String, default : COLOR_DONE },
             callbackdone : { type : Function, default : function(message) { console.log(message); }},
@@ -59,13 +61,16 @@
             data: {type: Array},
             asyncKey: {type: String, default: null},
             limit: {type: Number, default: 8},
+            delay: {type: Number, default: DELAY},
             matchCase: {type: Boolean, default: false},
             matchStart: {type: Boolean, default: false},
+            allowNew : {type: Boolean, default: false},
             onHit: {
               type: Function,
               default (item) { return item }
             },
             template: {type: String},
+            debug: {type: Boolean, default: false}
          },
 
         data : function() {
@@ -76,8 +81,7 @@
                 editmode : false,
                 styleerror : {},
                 styledone : {},
-                status : '',
-                height : 0
+                status : ''
             }
         },
 
@@ -112,6 +116,9 @@
                 });
             },
             store : function() {
+                if (this.debug) {
+                    alert(this.val)
+                }
                 // save only changes
                 if (this.val != this.old) {
                     // http-request
@@ -148,13 +155,13 @@
                 _.delay(function (me) {
                     me.styleerror['backgroundColor'] = 'transparent';
                     me.status = '';
-                }, this.delay, this);
+                }, this.fbdelay, this);
             },
             cleardone : function () {
                 _.delay(function (me) {
                     me.styledone['backgroundColor'] = 'transparent';
                     me.status = '';
-                }, this.delay, this);
+                }, this.fbdelay, this);
             }
         }
 
