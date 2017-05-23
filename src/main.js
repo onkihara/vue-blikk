@@ -6,9 +6,11 @@ import SlideawayExample from './examples/SlideawayExample.vue'
 import EditlineExample from './examples/EditlineExample.vue'
 import EditareaExample from './examples/EditareaExample.vue'
 import EdittypeaheadExample from './examples/EdittypeaheadExample.vue'
+import TaglistExample from './examples/TaglistExample.vue'
+import EdittagsinputExample from './examples/EditTagsinputExample.vue'
 
 
 new Vue({
   el: '#app',
-  render: h => h(EdittypeaheadExample)
+  render: h => h(EdittagsinputExample)
 })

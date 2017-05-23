@@ -16,7 +16,7 @@
 			@keydown.esc="reset"
 			@keydown.up.prevent="up"
 		/>
-		<ul v-if="typeahead" class="typeahead dropdown-menu" ref="dropdown">
+		<ul v-if="true" class="typeahead dropdown-menu" ref="dropdown">
 			<li v-for="(item, i) in items" :class="{active: isActive(i)}">
 				<a @mousedown.prevent="hit" @mousemove="setActive(i)">
 					<component :is="typeaheadcomponent" :item="item"></component>
@@ -33,8 +33,6 @@
 
 <script>
 
-	//import {delayer, getJSON} from './utils/utils.js'
-
 	const SIZE = 7;
 	const DELAY = 300;
 	const LIMIT = 8;
@@ -46,11 +44,10 @@
 			// preset tags
 			if (this.val) {
 				if (this.quote) {
-					var sep = '"' + this.separator + '"';
-					this.tags = this.val.substr(1,this.val.length-2).split(sep);
+					this.tags = this.val.split(this.separator).map(tag => tag.trim().replace(/^"+|"+$/g,''));
 				} else {
-            		this.tags = this.val.split(this.separator);
-            	}
+	        		this.tags = this.val.split(this.separator).map(tag => tag.trim());
+	        	}
             }
             // is typeahead
             if (this.data || this.async) {
@@ -139,6 +136,7 @@
 				this.active = false;
 				// typeahead
 				this.showDropdown = false;
+				//this.$emit('blur',this.tags);
 			},
 			hit : function() {
 				// typeahead
@@ -189,7 +187,10 @@
 				this.showDropdown = false;
 			},
 			// typeahead
-			reset : function() { this.setValue(null); },
+			reset : function() { 
+				this.setValue(null); 
+				this.$emit('reset');
+			},
 			setActive : function(index) { this.current = index; },
 			isActive : function(index) { return this.current === index; },
 			setValue : function(value) {
@@ -228,12 +229,12 @@
 				// show dropdown on right position
 				if (this.showDropdown = this.items.length > 0) {
 					var vm = this;
-					Vue.nextTick(function () {
+					this.$nextTick(function () {
 						vm.$refs.dropdown.style.left = vm.$refs.taginput.offsetLeft + 'px';
 					});
 				}
 			},
-			// @TODO: redo for vue-strap-library
+			
 			__update : _.throttle(function () {
 				var search = this.tagvalue.trim();
 				if (!search) {
@@ -250,9 +251,6 @@
 						.catch(function (error) {
 							console.log(error);
 						});
-						// getJSON(this.async + search).then(data => {
-						// 	this.setItems(data)
-						// })
 				} else if (this.data) {
 					this.setItems(this.data);
 				}
@@ -262,8 +260,80 @@
 
 </script>
 
-<style>
-	.dropdown-menu > li > a {
-	  cursor: pointer;
+<style lang="scss">
+
+	$bgcolor : rgba(218,176,199,.6);
+
+	.tagsinput {
+		border:1px solid grey;
+		padding:5px;
+		text-align:left;
+		min-height:20px;
+		position:relative;
+
+		input {
+			border:none;
+			font-size:1em;
+			&:focus {
+				outline:none;
+			}
+		}
+
+		.tag {
+			border:1px solid grey;
+			border-radius:5px;
+			padding:3px 15px 3px 5px;
+			display: inline-block;
+			margin: 0 4px;
+			color:black;
+			background-color:lightgrey;
+			position:relative;
+
+			.dismissable::before {
+				content: 'x';
+				position:absolute;
+				right:3px;
+				top:2px;
+				font-size:.7em;
+				color:#CC0000;
+				cursor:pointer;
+
+				&:hover {
+					text-decoration:underline;
+				}
+			}
+		}
+		
+		.dropdown-menu {
+		    position:absolute;
+		    top:100%;
+		    left:0px;
+		    min-width:160px;
+		    z-index:1000;
+		    padding:5px 0;
+		    margin:2px 0 0;
+		    list-style:none;
+		    text-align:left;
+		    border:1px solid #CCC;
+		    display:none;
+
+		    & > li {
+			    display:block;
+			    &.active {
+			    	background-color:$bgcolor;
+			    }
+			    & > a {
+			    	display:inline-block;
+			    	margin:3px 0px;
+			    	padding:2px;
+			    	width:100%;
+				    cursor: pointer;
+			    }
+			}
+		}
+
+		&.open .dropdown-menu {
+			display:block;
+		}
 	}
 </style>
