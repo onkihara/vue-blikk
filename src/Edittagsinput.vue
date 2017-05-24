@@ -1,16 +1,15 @@
 <template>
-    <span :class="status" :style="[styleerror, styledone]" class="edit-tagsinput">
+    <div :class="status" :style="[styleerror, styledone]" class="edit-tagsinput" v-click-outside="leave">
     
         <taglist v-if="!editmode" ref="taglist" :separator="separator" :quote="quote"><slot></slot></taglist>
 
-        <a v-if="!editmode" @click="edit" class="">
+        <a v-if="!editmode" @click.stop="edit" class="">
             <slot name="editicon"><span class="editicon">[edit]</span></slot>
         </a>
 
         <tagsinput 
             ref="input" 
             v-if="editmode" 
-            @blur="leave" 
             @reset="reset"
             @keydown.esc.stop="reset"
             v-model="val"
@@ -27,7 +26,7 @@
             :template="template"
         ></tagsinput>
 
-    </span>
+    </div>
 </template>
 
 <script>
@@ -36,6 +35,7 @@
     import _ from 'lodash';
     import Tagsinput from './Tagsinput.vue';
     import Taglist from './Taglist.vue';
+    import ClickOutside from './directives/ClickOutside.js';
 
     const DELAY = 300;
     const FBDELAY = 1000;
@@ -44,6 +44,10 @@
     const COLOR_DONE = '#b0dac2';
 
     export default {
+
+        directives: {
+            ClickOutside
+        },
 
         components : {
             taglist : Taglist,
@@ -107,19 +111,16 @@
                     this.$refs.input.focus();
                 });
             },
-            leave : function(tags) {
-                // prevents double execution on blur
+            leave : function() {
                 if ( ! this.editmode) {
                     return;
                 }
-                if (tags) {
-                    this.val = this.getTags(tags);
-                }
+                this.val = this.getTags(this.$refs.input.tags);
                 this.editmode = false;
                 this.$nextTick(function() {
                     this.setText(this.val);
                     // store
-                    //this.store();
+                    this.store();
                 });
             },
             reset : function() {
@@ -133,6 +134,7 @@
                 if (this.debug) {
                     alert(this.val)
                 }
+    console.log(this.val); return;
                 // save only changes
                 if (this.val != this.old) {
                     // http-request

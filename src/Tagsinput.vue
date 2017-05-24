@@ -136,7 +136,6 @@
 				this.active = false;
 				// typeahead
 				this.showDropdown = false;
-				//this.$emit('blur',this.tags);
 			},
 			hit : function() {
 				// typeahead
@@ -238,7 +237,7 @@
 			__update : _.throttle(function () {
 				var search = this.tagvalue.trim();
 				if (!search) {
-					this.reset();
+					this.setValue(null); 
 					return;
 				}
 				this.asign = ''
