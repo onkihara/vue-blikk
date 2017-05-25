@@ -137,11 +137,14 @@
 				// typeahead
 				this.showDropdown = false;
 			},
-			hit : function() {
+			hit : function(e) {
 				// typeahead
 				if (this.showDropdown) {
 					this.setValue(this.onHit(this.items[this.current], this));
 				} else {
+					if (e.key == 'Enter' && this.tagvalue == '') {
+						this.$emit('enter');
+					}
 					this.addTag();
 				}
 			},

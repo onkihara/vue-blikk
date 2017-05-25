@@ -1,5 +1,5 @@
 <template>
-    <div :class="status" :style="[styleerror, styledone]" class="edit-tagsinput" v-click-outside="leave">
+    <span :class="status" :style="[styleerror, styledone]" class="edit-tagsinput" v-click-outside="leave">
     
         <taglist v-if="!editmode" ref="taglist" :separator="separator" :quote="quote"><slot></slot></taglist>
 
@@ -11,6 +11,7 @@
             ref="input" 
             v-if="editmode" 
             @reset="reset"
+            @enter="leave"
             @keydown.esc.stop="reset"
             v-model="val"
             :quote="quote"
@@ -26,7 +27,7 @@
             :template="template"
         ></tagsinput>
 
-    </div>
+    </span>
 </template>
 
 <script>
@@ -100,8 +101,8 @@
         },
 
         mounted : function() {
-            this.val = this.old = this.$slots.default[0].text;
-            this.setTags(this.val);
+            this.setTags(this.$slots.default[0].text);
+            this.val = this.old = this.getTags(this.tags);
         },
 
         methods : {
@@ -134,7 +135,6 @@
                 if (this.debug) {
                     alert(this.val)
                 }
-    console.log(this.val); return;
                 // save only changes
                 if (this.val != this.old) {
                     // http-request
@@ -199,7 +199,7 @@
 
 <style lang="scss">
 
-    .edit-typeahead {
+    .edit-tagsinput {
 
         transition: background-color 0.5s;
         background-color:transparent;
@@ -216,8 +216,6 @@
         }
 
         input {
-            width:100%;
-            height:100%;
             font-family:inherit;
             font-size:100%;
         }
