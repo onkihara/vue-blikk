@@ -75,7 +75,8 @@
 			template: {type: String},
 			limit : { type : Number, default : LIMIT},
 			matchCase : { type : Boolean, default : false },
-			matchStart : { type : Boolean, default : false }
+			matchStart : { type : Boolean, default : false },
+			allowNew : { type: Boolean, default : true }
 		},
 
 		data : function() {
@@ -148,6 +149,19 @@
 					this.addTag();
 				}
 			},
+			addTag : function() {
+				if ( ! this.tagvalue) {
+					return;
+				}
+				// allow-new
+				if ( ! this.allowNew && this.tagvalue != this.items[this.current]) {
+					return;
+				}
+				this.tags.push(this.tagvalue);
+				this.tagvalue = '';
+				this.size = SIZE;
+				this.showDropdown = false;
+			},
 			removeTag : function(tagindex) {
 				if (this.tags[tagindex]) {
 					this.tags.splice(tagindex,1);
@@ -178,15 +192,6 @@
 					this.addTag();
 					return;
 				}
-			},
-			addTag : function() {
-				if ( ! this.tagvalue) {
-					return;
-				}
-				this.tags.push(this.tagvalue);
-				this.tagvalue = '';
-				this.size = SIZE;
-				this.showDropdown = false;
 			},
 			// typeahead
 			reset : function() { 

@@ -25,6 +25,7 @@
             :match-start="matchStart"
             :on-hit="onHit"
             :template="template"
+            :allow-new="allowNew"
         ></tagsinput>
 
     </span>
@@ -72,6 +73,7 @@
             name : { type : String },
             placeholder : {type: String },
             value :  { type : String, default : '' },
+            allowNew : { type : Boolean, default : true },
             // typeahead
             onHit: {
                 type: Function,

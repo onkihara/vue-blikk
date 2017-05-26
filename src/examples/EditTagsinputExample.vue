@@ -4,7 +4,7 @@
 
 	<hr />
 
-	<edit-tagsinput separator="," :quote="true" :data="data">
+	<edit-tagsinput separator="," :quote="true" :data="data" :allow-new="false">
 		"eins" , "zwei", "drei"
 	</edit-tagsinput>
 
