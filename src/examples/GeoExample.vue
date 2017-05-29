@@ -12,7 +12,11 @@
 		label-long="Länge" 
 		label-lat="Breite"
 		:longitude="longitude" 
-		:latitude="latitude">
+		:latitude="latitude"
+		airts="N,O,S,W" 
+		:coordtype="type"
+		btn-text = "Formate"
+	>
 	</geo-coordinates>
 
 	<qr-code :src="source"></qr-code>
@@ -37,8 +41,9 @@
 		data () {
 			return {
 				msg: 'Geo-Test',
-				longitude :'O 11.354',
-				latitude : 'N 43.4545',
+				longitude : "11.184245",
+				latitude : '-43.245215',
+				type : 1,
 				source : ''
 			}
 		}

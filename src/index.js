@@ -1,6 +1,7 @@
 // Components
 typeahead = require('./Typeahead.vue')
 tagsinput = require('./Tagsinput.vue')
+dropdowninput = require('./Dropdowninput.vue')
 taglist = require('./Taglist.vue')
 slideAway = require('./Slideaway.vue')
 editLine = require('./Editline.vue')
@@ -11,6 +12,7 @@ editTagsinput = require('./Edittagsinput.vue')
 const VueBlikk = {
   typeahead,
   tagsinput,
+  dropdowninput,
   taglist,
   slideAway,
   editLine,
