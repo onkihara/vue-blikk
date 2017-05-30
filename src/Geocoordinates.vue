@@ -1,37 +1,62 @@
 <template>
     <div class="geo-coordinates">
 
-        <div class="form-group">
-            <label for="lat">{{ labelLat }}</label>
-            <dropdown-input
-                v-model="latvalue" 
-                name="nameLat" 
-                :data="lats" 
-                :placeholder="placeholderLat" 
-                :btn-text="btnText"
-                :disabled="disabled"
-                @blur="recalcLat" 
-                @esc="esc"
-                @selected="selectedLat"
-                @changed="recalcLat"
-            ></dropdown-input>
+        <div :class="{ apileft : apikey }">
+            <div class="form-group">
+                <label for="lat">{{ labelLat }}</label>
+                <dropdown-input
+                    v-model="latvalue" 
+                    :data="lats" 
+                    :placeholder="placeholderLat" 
+                    :btn-text="btnText"
+                    :disabled="disabled"
+                    @blur="recalcLat" 
+                    @esc="esc"
+                    @selected="selectedLat"
+                    @changed="recalcLat"
+                ></dropdown-input>
+            </div>
+            <div class="form-group">
+                <label for="long">{{ labelLong }}</label>
+                <dropdown-input
+                    v-model="longvalue" 
+                    :data="longs" 
+                    :placeholder="placeholderLong" 
+                    :btn-text="btnText"
+                    :disabled="disabled"
+                    @blur="recalcLong" 
+                    @esc="esc"
+                    @selected="selectedLong"
+                    @changed="recalcLong"
+                ></dropdown-input>
+            </div>
         </div>
-        
-       <div class="form-group">
-            <label for="long">{{ labelLong }}</label>
-            <dropdown-input
-                v-model="longvalue" 
-                name="nameLong" 
-                :data="longs" 
-                :placeholder="placeholderLong" 
-                :btn-text="btnText"
-                :disabled="disabled"
-                @blur="recalcLong" 
-                @esc="esc"
-                @selected="selectedLong"
-                @changed="recalcLong"
-            ></dropdown-input>
+
+        <div class="apiright" v-if="apikey">
+            <a @click.prevent="openModal"><span class="glyphicon glyphicon-globe"></span></a>           
         </div>
+
+        <modal v-model="apiOpen" ref="apimodal" class="apicontainer">
+            <span slot="title">{{ apititle }}</span>
+            <div class="mapcontainer" ref="map"></div>
+            <div class="kimme"><span @click="mok" class="korn glyphicon glyphicon-screenshot"></span></div>
+            <div slot="modal-footer" class="modal-footer">
+                <div class="form-group">
+                    <label>{{ labelLat }}
+                        <input class="form-control" @blur="setCenter" @keydown.enter="setCenter" type="text" v-model="mlat" />
+                    </label>
+                    <label>{{ labelLong }}
+                        <input class="form-control" @blur="setCenter" @keydown.enter="setCenter" type="text" v-model="mlong" />
+                    </label>
+                    <button type="button" @click="mok" class="btn btn-primary">{{ apiok }}</button>
+                    <button type="button" @click="mcancel" class="btn btn-default">{{ apicancel }}</button>
+                </div>
+            </div>
+        </modal>
+
+        <input type="hidden" :name="nameLat" :value="lat" />
+        <input type="hidden" :name="nameLong" :value="long" />
+        <input type="hidden" :name="nameFormatType" :value="type" />
 
     </div>
 </template>
@@ -40,7 +65,10 @@
 
     import Axios from 'axios';
     import _ from 'lodash';
-    import Ddinput from './Dropdowninput.vue'
+    import Ddinput from './Dropdowninput.vue';
+    import Modal from './Modal.vue';
+    import loadGoogleMapsAPI from 'load-google-maps-api';
+    //const loadGoogleMapsAPI = require('load-google-maps-api')
 
     const NUM = 1;
     const DEG = 2;
@@ -51,7 +79,8 @@
     export default {
 
         components : {
-            'dropdown-input' : Ddinput
+            'dropdown-input' : Ddinput,
+            'modal' : Modal
         },
 
         mounted() {
@@ -60,6 +89,16 @@
             }
             if (this.latitude) {
                 this.recalcLat(this.latitude);
+            }
+            // load google maps
+            if ( ! this.googleMaps) {
+                loadGoogleMapsAPI({
+                    key : this.apikey
+                }).then(googleMaps => {
+                    this.googleMaps = googleMaps;
+                }).catch((err) => {
+                    console.error(err)
+                }); 
             }
         },
 
@@ -74,8 +113,10 @@
         },
 
          props : {
+            // coordinates properties
             nameLong : { type : String, default : 'long' },
             nameLat : { type : String, default : 'lat' },
+            nameFormatType : { type : String, default : 'type' },
             labelLong : { type : String, default : 'Longitude' },
             labelLat : { type : String, default : 'Latitude' },
             placeholderLong : { type : String, default : 'Longitude' },
@@ -84,11 +125,20 @@
             latitude : { type : String, default : '' },
             airts : { type : String, default: 'N,E,S,W' },
             btnText : { type : String, default : 'Formats'},
-            coordtype : { type : Number, default : NUM }
-         },
+            coordtype : { type : Number, default : NUM },
+            // google-api properties
+            apikey : { type : String, default: '' },
+            apilat : { type : String, default : '46.499597' },
+            apilong : { type : String, default : '11.341741' },
+            apizoom : { type : String, default : '8' },
+            apititle : { type : String, default : 'Choose coordinates ...' },
+            apicancel : { type : String, default : 'Cancel' },
+            apiok : { type : String, default : 'Save' },
+          },
 
         data : function() {
             return {
+                // coordinates data
                 long : 0,
                 lat : 0,
                 longs : {},
@@ -96,11 +146,71 @@
                 longvalue : '',
                 latvalue : '',
                 disabled : false,
-                type : this.coordtype
+                type : this.coordtype,
+                // api-data
+                apiOpen : false,
+                modalHeight : window.innerHeight - 30,
+                googleMaps : null,
+                map : null,
+                mlat : this.apilat,
+                mlong : this.apilong
             }
         },
 
         methods : {
+
+            openModal : function() {
+                this.apiOpen = true;
+                this.$refs.apimodal.$refs.modaldialog.style.height = this.modalHeight + 'px';
+                // set center from
+                if (this.long && this.lat) {
+                    this.mlat = this.lat;
+                    this.mlong = this.long;
+                }
+                this.createMap();
+            },
+
+            mok : function() {
+                this.recalcLat(this.mlat);
+                this.recalcLong(this.mlong);
+                this.$refs.apimodal.action(false,3);
+            },
+
+            mcancel : function() {
+                this.$refs.apimodal.action(false,3);
+            },
+
+            createMap : function() {
+                // create only once
+                if (this.map) {
+                    this.setCenter(this.lat,this.long);
+                    return;
+                }
+                // create Map
+                this.map = new this.googleMaps.Map(this.$refs.map, {
+                    zoom : parseInt(this.apizoom),
+                    mapTypeId : this.googleMaps.MapTypeId.ROADMAP,
+                    center : new this.googleMaps.LatLng(this.mlat,this.mlong)
+                });
+                // add listener
+                this.map.addListener('center_changed', () => {
+                    this.getCenter();
+                });
+            },
+
+            setCenter : function(lat,long) {
+                this.$nextTick((lat,long) => {
+                    lat = lat || this.mlat;
+                    long = long || this.mlong;
+                    this.map.setCenter(new this.googleMaps.LatLng(lat,long));
+                });
+            },
+
+            getCenter : function() {
+                var center = this.map.getCenter();
+                this.mlat = this.round(center.lat(),EXP).toString();
+                this.mlong = this.round(center.lng(),EXP).toString();
+            },
 
             recalcLat : function(coord) {
                 coord = coord || this.lat;
@@ -245,14 +355,78 @@
 
 <style lang="scss">
 
+    $kornsize: 30px;
+
     .geo-coordinates {
         
         .degbuttons {
             margin-top:40px;
             text-align:right;
         }
-        
 
+        .apileft {
+            width:70%;
+            float:left;
+        }
+
+        .apiright {
+            width:30%;
+            float:left;
+
+            a {
+                text-decoration: none;
+                display:flex;
+                cursor:pointer;
+                width:100%;
+                height:150px;
+                justify-content: center;
+                align-items: center;
+
+                span {
+                    font-size: 5em;
+                    display:block;
+                }
+            }
+        }
+
+        .modal-dialog {
+            width:98%;
+            margin-top:15px;
+
+            .modal-content {
+                height:100%;
+            }
+        }
+
+        .modal-body {
+            height:80%;
+
+            .mapcontainer {
+                width:100%;
+                height:100%;
+            }
+
+            .kimme {
+                position:absolute;
+                top:50%;
+                left:50%;
+                width:10px;
+                height:10px;
+                .korn {
+                    color:rgba(255,0,0,.5);
+                    font-size:$kornsize;
+                    position: absolute;
+                    top:-$kornsize/2;
+                    left:-$kornsize/2;
+                }
+            }
+        }
+
+        .modal-footer {
+            label {
+                text-align:left;
+            }
+        }
     }
 
  </style>

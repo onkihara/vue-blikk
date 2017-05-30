@@ -29,7 +29,7 @@
 
 export default {
 	props: {
-		name : { type:String, default : 'dropdowninput'},
+		name : { type:String, default : ''},
 		btnText : { type: String, default : ''},
 		data: { type: Object },
 		placeholder: {type: String},
@@ -83,7 +83,11 @@ export default {
 		setActive (index) { this.current = index },
 		isActive (index) { return this.current === index },
 		blur() { this.$emit('blur',this.val); },
-		esc() { this.val = this.old; this.$emit('esc',this.val); },
+		esc() { 
+			this.val = this.old; 
+			this.$emit('esc',this.val); 
+			this.showDropdown = false; 
+		},
 		enter() { this.$emit('changed',this.val); }
 	}
 }
