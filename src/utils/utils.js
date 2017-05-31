@@ -150,3 +150,5 @@ export function VueFixer (vue) {
   vue.mixins.unshift(mixin)
   return vue
 }
+
+

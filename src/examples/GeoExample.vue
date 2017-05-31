@@ -26,6 +26,28 @@
 		apicancel="Abbrechen"
 	></geo-coordinates>
 
+<!-- 	<geo-coordinates 
+		name-long="long" 
+		name-lat="lat" 
+		name-format-type="ftype"
+		placeholder-long="Länge" 
+		placeholder-lat="Breite"
+		label-long="Länge" 
+		label-lat="Breite"
+		:longitude="longitude" 
+		:latitude="latitude"
+		airts="N,O,S,W" 
+		:coordtype="type"
+		btn-text = "Formate"
+		apikey="AIzaSyD5LTJK9n2N-ahjfGqwutnt_7fPpXKpR8s" 
+		apilat="46.49950" 
+		apilong="11.34181"
+		apizoom="9"
+		apititle="Wählen Sie hier die Koordinaten ..."
+		apiok="Übernehmen" 
+		apicancel="Abbrechen"
+	></geo-coordinates>
+ -->
 	<qr-code :src="source"></qr-code>
 
   </div>

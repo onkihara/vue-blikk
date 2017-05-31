@@ -36,9 +36,17 @@
             <a @click.prevent="openModal"><span class="glyphicon glyphicon-globe"></span></a>           
         </div>
 
-        <modal v-model="apiOpen" ref="apimodal" class="apicontainer">
+        <modal v-model="apiOpen" ref="apimodal" @opened="mopened" class="apicontainer">
             <span slot="title">{{ apititle }}</span>
-            <div class="mapcontainer" ref="map"></div>
+
+            <gmap-map class="mapcontainer" 
+                ref="map" 
+                @center_changed="getCenter" 
+                map-type-id="roadmap" 
+                :center="center" 
+                :zoom="mzoom">
+            </gmap-map>
+
             <div class="kimme"><span @click="mok" class="korn glyphicon glyphicon-screenshot"></span></div>
             <div slot="modal-footer" class="modal-footer">
                 <div class="form-group">
@@ -49,6 +57,7 @@
                         <input class="form-control" @blur="setCenter" @keydown.enter="setCenter" type="text" v-model="mlong" />
                     </label>
                     <button type="button" @click="mok" class="btn btn-primary">{{ apiok }}</button>
+                    <button type="button" @click="mreset" class="btn btn-primary">{{ apireset }}</button>
                     <button type="button" @click="mcancel" class="btn btn-default">{{ apicancel }}</button>
                 </div>
             </div>
@@ -67,14 +76,22 @@
     import _ from 'lodash';
     import Ddinput from './Dropdowninput.vue';
     import Modal from './Modal.vue';
-    import loadGoogleMapsAPI from 'load-google-maps-api';
-    //const loadGoogleMapsAPI = require('load-google-maps-api')
+    import Vue from 'vue';
+    import * as VueGoogleMaps from 'vue2-google-maps';
 
     const NUM = 1;
     const DEG = 2;
     const MIN = 3;
     const SEC = 4;
     const EXP = 6; // Nachkommastellen
+
+    Vue.use(VueGoogleMaps, {
+        load: {
+            key: 'AIzaSyD5LTJK9n2N-ahjfGqwutnt_7fPpXKpR8s',
+            // v: 'OPTIONAL VERSION NUMBER',
+            // libraries: 'places', //// If you need to use place input 
+        }
+    });
 
     export default {
 
@@ -90,17 +107,9 @@
             if (this.latitude) {
                 this.recalcLat(this.latitude);
             }
-            // load google maps
-            if ( ! this.googleMaps) {
-                loadGoogleMapsAPI({
-                    key : this.apikey
-                }).then(googleMaps => {
-                    this.googleMaps = googleMaps;
-                }).catch((err) => {
-                    console.error(err)
-                }); 
-            }
-        },
+            // set center-coords
+            this.minit();
+          },
 
         watch : {
             // change of dropdownformats
@@ -109,8 +118,11 @@
                     this.latvalue = this.lats[this.type];
                     this.longvalue = this.longs[this.type];
                 }
-            } 
-        },
+            },
+            center(val) {
+                //console.log(val)
+            }
+          },
 
          props : {
             // coordinates properties
@@ -134,7 +146,8 @@
             apititle : { type : String, default : 'Choose coordinates ...' },
             apicancel : { type : String, default : 'Cancel' },
             apiok : { type : String, default : 'Save' },
-          },
+            apireset : { type : String, default : 'Reset'}
+        },
 
         data : function() {
             return {
@@ -150,10 +163,10 @@
                 // api-data
                 apiOpen : false,
                 modalHeight : window.innerHeight - 30,
-                googleMaps : null,
-                map : null,
-                mlat : this.apilat,
-                mlong : this.apilong
+                mlat : '',
+                mlong : '',
+                center : {},
+                mzoom : parseInt(this.apizoom),
             }
         },
 
@@ -162,12 +175,21 @@
             openModal : function() {
                 this.apiOpen = true;
                 this.$refs.apimodal.$refs.modaldialog.style.height = this.modalHeight + 'px';
-                // set center from
+                this.minit();
+             },
+
+            minit : function() {
+                // set center from data or props
                 if (this.long && this.lat) {
-                    this.mlat = this.lat;
-                    this.mlong = this.long;
+                    this.setCenter(this.lat,this.long);
+                } else {
+                    this.setCenter(this.apilat,this.apilong);
                 }
-                this.createMap();
+             },
+
+            mopened : function() {
+                // trigger map resize after modal shown!
+                google.maps.event.trigger(this.$refs.map.$mapObject, 'resize');
             },
 
             mok : function() {
@@ -180,34 +202,22 @@
                 this.$refs.apimodal.action(false,3);
             },
 
-            createMap : function() {
-                // create only once
-                if (this.map) {
-                    this.setCenter(this.lat,this.long);
-                    return;
-                }
-                // create Map
-                this.map = new this.googleMaps.Map(this.$refs.map, {
-                    zoom : parseInt(this.apizoom),
-                    mapTypeId : this.googleMaps.MapTypeId.ROADMAP,
-                    center : new this.googleMaps.LatLng(this.mlat,this.mlong)
-                });
-                // add listener
-                this.map.addListener('center_changed', () => {
-                    this.getCenter();
-                });
+            mreset : function() {
+                this.mlat = this.lat.toString();
+                this.mlong = this.long.toString();
+                    this.center = { lat: 0.0, lng : 0.0 };
+                this.setCenter();
             },
 
             setCenter : function(lat,long) {
-                this.$nextTick((lat,long) => {
-                    lat = lat || this.mlat;
-                    long = long || this.mlong;
-                    this.map.setCenter(new this.googleMaps.LatLng(lat,long));
+                this.$nextTick(function() {
+                    lat = this.round(lat || this.mlat,EXP);
+                    long = this.round(long || this.mlong,EXP);
+                    this.center = { lat : lat, lng : long };
                 });
             },
 
-            getCenter : function() {
-                var center = this.map.getCenter();
+            getCenter : function(center) {
                 this.mlat = this.round(center.lat(),EXP).toString();
                 this.mlong = this.round(center.lng(),EXP).toString();
             },
