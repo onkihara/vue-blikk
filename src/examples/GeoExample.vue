@@ -18,14 +18,17 @@
 		:coordtype="type"
 		btn-text = "Formate"
 		apikey="AIzaSyD5LTJK9n2N-ahjfGqwutnt_7fPpXKpR8s" 
-		apilat="46.49950" 
-		apilong="11.34181"
+		apilat="46.49943169" 
+		apilong="11.34164907"
 		apizoom="9"
+		precision="6"
 		apititle="Wählen Sie hier die Koordinaten ..."
 		apiok="Übernehmen" 
 		apicancel="Abbrechen"
 	></geo-coordinates>
 
+	<qr-code :src="source"></qr-code>
+	
 <!-- 	<geo-coordinates 
 		name-long="long" 
 		name-lat="lat" 
@@ -34,21 +37,20 @@
 		placeholder-lat="Breite"
 		label-long="Länge" 
 		label-lat="Breite"
-		:longitude="longitude" 
-		:latitude="latitude"
+		:longitude="longitude1" 
+		:latitude="latitude1"
 		airts="N,O,S,W" 
 		:coordtype="type"
 		btn-text = "Formate"
 		apikey="AIzaSyD5LTJK9n2N-ahjfGqwutnt_7fPpXKpR8s" 
-		apilat="46.49950" 
-		apilong="11.34181"
+		apilat="46.49943169" 
+		apilong="11.34164907"
 		apizoom="9"
 		apititle="Wählen Sie hier die Koordinaten ..."
 		apiok="Übernehmen" 
 		apicancel="Abbrechen"
 	></geo-coordinates>
  -->
-	<qr-code :src="source"></qr-code>
 
   </div>
 </template>
@@ -72,7 +74,9 @@
 				msg: 'Geo-Test',
 				longitude : "11.184245",
 				latitude : '43.245215',
-				type : 1,
+				longitude1 : "",
+				latitude1 : '',
+				type : '1',
 				source : ''
 			}
 		}

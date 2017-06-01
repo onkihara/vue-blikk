@@ -51,10 +51,10 @@
             <div slot="modal-footer" class="modal-footer">
                 <div class="form-group">
                     <label>{{ labelLat }}
-                        <input class="form-control" @blur="setCenter" @keydown.enter="setCenter" type="text" v-model="mlat" />
+                        <input class="form-control" @blur="medit" @keydown.enter="medit" type="text" v-model="mlat" />
                     </label>
                     <label>{{ labelLong }}
-                        <input class="form-control" @blur="setCenter" @keydown.enter="setCenter" type="text" v-model="mlong" />
+                        <input class="form-control" @blur="medit" @keydown.enter="medit" type="text" v-model="mlong" />
                     </label>
                     <button type="button" @click="mok" class="btn btn-primary">{{ apiok }}</button>
                     <button type="button" @click="mreset" class="btn btn-primary">{{ apireset }}</button>
@@ -83,7 +83,7 @@
     const DEG = 2;
     const MIN = 3;
     const SEC = 4;
-    const EXP = 6; // Nachkommastellen
+    const EXP = 8; // Nachkommastellen
 
     Vue.use(VueGoogleMaps, {
         load: {
@@ -112,17 +112,16 @@
           },
 
         watch : {
+
             // change of dropdownformats
             type(val, old) {
                 if (old != val) {
                     this.latvalue = this.lats[this.type];
                     this.longvalue = this.longs[this.type];
                 }
-            },
-            center(val) {
-                //console.log(val)
             }
-          },
+
+           },
 
          props : {
             // coordinates properties
@@ -137,11 +136,12 @@
             latitude : { type : String, default : '' },
             airts : { type : String, default: 'N,E,S,W' },
             btnText : { type : String, default : 'Formats'},
-            coordtype : { type : Number, default : NUM },
+            coordtype : { type : String, default : NUM.toString() },
+            precision : { type : String, default : EXP.toString() },
             // google-api properties
             apikey : { type : String, default: '' },
-            apilat : { type : String, default : '46.499597' },
-            apilong : { type : String, default : '11.341741' },
+            apilat : { type : String, default : '46.49942984' },
+            apilong : { type : String, default : '11.3416598' },
             apizoom : { type : String, default : '8' },
             apititle : { type : String, default : 'Choose coordinates ...' },
             apicancel : { type : String, default : 'Cancel' },
@@ -159,7 +159,7 @@
                 longvalue : '',
                 latvalue : '',
                 disabled : false,
-                type : this.coordtype,
+                type : parseInt(this.coordtype),
                 // api-data
                 apiOpen : false,
                 modalHeight : window.innerHeight - 30,
@@ -175,7 +175,6 @@
             openModal : function() {
                 this.apiOpen = true;
                 this.$refs.apimodal.$refs.modaldialog.style.height = this.modalHeight + 'px';
-                this.minit();
              },
 
             minit : function() {
@@ -190,6 +189,7 @@
             mopened : function() {
                 // trigger map resize after modal shown!
                 google.maps.event.trigger(this.$refs.map.$mapObject, 'resize');
+                this.minit();
             },
 
             mok : function() {
@@ -203,23 +203,33 @@
             },
 
             mreset : function() {
-                this.mlat = this.lat.toString();
-                this.mlong = this.long.toString();
-                    this.center = { lat: 0.0, lng : 0.0 };
-                this.setCenter();
+                this.setCenter(this.lat,this.long);
+            },
+
+            medit : function() {
+                this.$nextTick(function() {
+                    var lat = this.parse(this.mlat, false);
+                    var long = this.parse(this.mlong, false);
+                    this.setCenter(lat,long);
+                });
             },
 
             setCenter : function(lat,long) {
                 this.$nextTick(function() {
-                    lat = this.round(lat || this.mlat,EXP);
-                    long = this.round(long || this.mlong,EXP);
-                    this.center = { lat : lat, lng : long };
+                    // set to actual map-center (no 2-way-binding for this.center)
+                    this.center = { lat : this.round(this.mlat,this.precision), lng : this.round(this.mlong,this.precision) };
+                    // set to new center
+                    this.$nextTick(function() {
+                        if ( lat && long) {
+                            this.center = { lat : this.round(lat,this.precision), lng : this.round(long,this.precision) };
+                        }
+                    });
                 });
             },
 
             getCenter : function(center) {
-                this.mlat = this.round(center.lat(),EXP).toString();
-                this.mlong = this.round(center.lng(),EXP).toString();
+                this.mlat = this.round(center.lat(),this.precision).toString();
+                this.mlong = this.round(center.lng(),this.precision).toString();
             },
 
             recalcLat : function(coord) {
@@ -279,15 +289,17 @@
                 }
                 c[DEG] = airt + ' ' + coords + '°';
                 // calc MIN
-                var min = this.round((coords - Math.trunc(coords)) * 60,EXP);
+                var minprecision = this.precision - 2 > 0 ? this.precision - 2 : 0;
+                var min = this.round((coords - Math.trunc(coords)) * 60,minprecision);
                 c[MIN] = airt + ' ' + Math.trunc(coords) + '° ' + min + "'";
                 // calc SEC
-                var sec = this.round((min - Math.trunc(min)) * 60,EXP);
+                var secprecision = minprecision - 2 > 0 ? minprecision - 2 : 0;
+                var sec = this.round((min - Math.trunc(min)) * 60,secprecision);
                 c[SEC] = airt + ' ' + Math.trunc(coords) + '° ' + Math.trunc(min) + "' " + sec + '"';
                 return c;
             },
 
-            parse(coord) {
+            parse(coord, settype=true) {
                 coord = ''+coord;
                 // test for cardinal point (N,E,S,W)
                 var cardinalpoint, s = '';
@@ -339,8 +351,10 @@
                 deg = parseFloat(part[0]);
                 //console.log(deg);
                 //console.log(sign)
-                this.type = type;
-                return this.round(sign * (deg + min / 60 + sec / 3600),EXP);
+                if (settype) {
+                    this.type = type;
+                }
+                return this.round(sign * (deg + min / 60 + sec / 3600),this.precision);
             },
 
             round(value, exp) {
