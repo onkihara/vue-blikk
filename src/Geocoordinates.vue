@@ -159,7 +159,7 @@
                 longvalue : '',
                 latvalue : '',
                 disabled : false,
-                type : parseInt(this.coordtype),
+                type : this.coordtype,
                 // api-data
                 apiOpen : false,
                 modalHeight : window.innerHeight - 30,
@@ -305,12 +305,12 @@
                 var cardinalpoint, s = '';
                 var sign = 1;
                 var airts = this.airts.split(',');
-                var type = 1;
+                var type = NUM;
                 _.forEach(airts, cp => {
                     s = new RegExp(cp,'ig');
                     if (coord.search(s) > -1) { 
                         cardinalpoint = _.toUpper(cp);
-                        type = 2;
+                        type = DEG;
                     }
                     coord = coord.replace(s,''); 
                 });
@@ -337,14 +337,14 @@
                 var part = coord.split("'");
                 if (part[1]) {
                     sec = parseFloat(part[1]);
-                    type = 4;
+                    type = SEC;
                 }
                 //console.log(sec);
                 // check for minutes (at degree-sign)
                 var part = part[0].split("°");
                 if (part[1]) {
                     min = parseFloat(part[1]);
-                    type = 3;
+                    type = MIN;
                 }
                 //console.log(min);
                 // degrees
