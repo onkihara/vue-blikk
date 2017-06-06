@@ -240,9 +240,11 @@
 						vm.$refs.dropdown.style.left = vm.$refs.taginput.offsetLeft + 'px';
 					});
 				}
-			},
-			
-			__update : _.throttle(function () {
+			}			
+		},
+
+		created() {
+			this.__update = _.throttle(function () {
 				var search = this.tagvalue.trim();
 				if (!search) {
 					this.setValue(null); 
@@ -261,7 +263,7 @@
 				} else if (this.data) {
 					this.setItems(this.data);
 				}
-			}, this.delay, { leading : false })
+			}, this.delay, { leading : false });
 		}
 	}
 

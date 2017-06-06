@@ -27,7 +27,11 @@
 		apicancel="Abbrechen"
 	></geo-coordinates>
 
-	<qr-code :src="source"></qr-code>
+	<hr style="clear:both" />
+
+	<qr-code :qr-source="sourceurl" :qr-generator="generatorurl" qr-placeholder="/dist/logo.png">
+		
+	</qr-code>
 	
 <!-- 	<geo-coordinates 
 		name-long="long" 
@@ -77,7 +81,8 @@
 				longitude1 : "",
 				latitude1 : '',
 				type : '1',
-				source : ''
+				sourceurl : '',
+				generatorurl : 'debug'
 			}
 		}
 	}

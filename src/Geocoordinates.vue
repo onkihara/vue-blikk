@@ -67,7 +67,7 @@
         <input type="hidden" :name="nameLong" :value="long" />
         <input type="hidden" :name="nameFormatType" :value="type" />
 
-    </div>
+     </div>
 </template>
 
 <script>
