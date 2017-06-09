@@ -4,7 +4,7 @@
 
 	<hr />
 
-	<geo-coordinates 
+	<edit-geo-coordinates 
 		name-long="long" 
 		name-lat="lat" 
 		name-format-type="ftype"
@@ -17,7 +17,7 @@
 		airts="N,O,S,W" 
 		:coordtype="type"
 		btn-text = "Formate"
-		apikey="AIzaSyD5LTJK9n2N-ahjfGqwutnt_7fPpXKpR8s" 
+		:usemap="true" 
 		apilat="46.49943169" 
 		apilong="11.34164907"
 		apizoom="9"
@@ -25,15 +25,17 @@
 		apititle="Wählen Sie hier die Koordinaten ..."
 		apiok="Übernehmen" 
 		apicancel="Abbrechen"
-	></geo-coordinates>
+	></edit-geo-coordinates>
 
 	<hr style="clear:both" />
 
-	<qr-code :qr-source="sourceurl" :qr-generator="generatorurl" qr-placeholder="/dist/logo.png">
+	<edit-qr-code :qr-source="sourceurl" :qr-generator="generatorurl" qr-placeholder="/dist/logo.png">
 		
-	</qr-code>
+	</edit-qr-code>
 	
-<!-- 	<geo-coordinates 
+	<hr style="clear:both" />
+
+	<edit-geo-coordinates 
 		name-long="long" 
 		name-lat="lat" 
 		name-format-type="ftype"
@@ -46,31 +48,31 @@
 		airts="N,O,S,W" 
 		:coordtype="type"
 		btn-text = "Formate"
-		apikey="AIzaSyD5LTJK9n2N-ahjfGqwutnt_7fPpXKpR8s" 
+		:usemap="true" 
 		apilat="46.49943169" 
 		apilong="11.34164907"
 		apizoom="9"
 		apititle="Wählen Sie hier die Koordinaten ..."
 		apiok="Übernehmen" 
 		apicancel="Abbrechen"
-	></geo-coordinates>
- -->
+	></edit-geo-coordinates>
+
 
   </div>
 </template>
 
 <script>
 
-	import Geocoordinates from '../Geocoordinates.vue'
-	import Qrcode from '../Qrcode.vue'
-
+	import EditGeocoordinates from '../Editgeocoordinates.vue'
+	import EditQrcode from '../Editqrcode.vue'
+ 
 	export default {
 
 		name: 'app',
 
 		components : {
-			'geo-coordinates' : Geocoordinates,
-			'qr-code' : Qrcode
+			'edit-geo-coordinates' : EditGeocoordinates,
+			'edit-qr-code' : EditQrcode
 		},
 
 		data () {

@@ -8,6 +8,8 @@ editLine = require('./Editline.vue')
 editArea = require('./Editarea.vue')
 editTypeahead = require('./Edittypeahead.vue')
 editTagsinput = require('./Edittagsinput.vue')
+editGeocoordinates = require('./Editgeocoordinates.vue')
+editQrcode = require('./Editqrcode.vue')
 
 const VueBlikk = {
   typeahead,
@@ -18,7 +20,9 @@ const VueBlikk = {
   editLine,
   editArea,
   editTypeahead,
-  editTagsinput
+  editTagsinput,
+  editGeocoordinates,
+  editQrcode
 }
 
 module.exports = VueBlikk

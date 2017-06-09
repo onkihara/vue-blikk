@@ -1,7 +1,7 @@
 <template>
     <div class="geo-coordinates">
 
-        <div :class="{ apileft : apikey }">
+        <div :class="{ apileft : usemap }">
             <div class="form-group">
                 <label for="lat">{{ labelLat }}</label>
                 <dropdown-input
@@ -32,8 +32,11 @@
             </div>
         </div>
 
-        <div class="apiright" v-if="apikey">
-            <a @click.prevent="openModal"><span class="glyphicon glyphicon-globe"></span></a>           
+        <div class="apiright" v-if="usemap">
+            <a slot="map-icon" @click.prevent="openModal">
+                <span class="btn-map glyphicon glyphicon-globe">{{ iconMap }}</span>
+                <span class="btn-text-map">{{ textMap }}</span>
+            </a>           
         </div>
 
         <modal v-model="apiOpen" ref="apimodal" @opened="mopened" class="apicontainer">
@@ -51,10 +54,10 @@
             <div slot="modal-footer" class="modal-footer">
                 <div class="form-group">
                     <label>{{ labelLat }}
-                        <input class="form-control" @blur="medit" @keydown.enter="medit" type="text" v-model="mlat" />
+                        <input class="form-control" @blur="medit" @keydown.enter="medit" type="text" v-model="mlatvalue" />
                     </label>
                     <label>{{ labelLong }}
-                        <input class="form-control" @blur="medit" @keydown.enter="medit" type="text" v-model="mlong" />
+                        <input class="form-control" @blur="medit" @keydown.enter="medit" type="text" v-model="mlongvalue" />
                     </label>
                     <button type="button" @click="mok" class="btn btn-primary">{{ apiok }}</button>
                     <button type="button" @click="mreset" class="btn btn-primary">{{ apireset }}</button>
@@ -84,14 +87,13 @@
     const MIN = 3;
     const SEC = 4;
     const EXP = 8; // Nachkommastellen
+    const APIKEY = 'AIzaSyD5LTJK9n2N-ahjfGqwutnt_7fPpXKpR8s' // google-api-key
 
-    Vue.use(VueGoogleMaps, {
-        load: {
-            key: 'AIzaSyD5LTJK9n2N-ahjfGqwutnt_7fPpXKpR8s',
-            // v: 'OPTIONAL VERSION NUMBER',
-            // libraries: 'places', //// If you need to use place input 
-        }
-    });
+    if (window != 'undefined' && window.Vue) {
+        window.Vue.use(VueGoogleMaps, {load : { key : APIKEY }});
+    } else {
+        Vue.use(VueGoogleMaps, {load : { key : APIKEY }});
+    }
 
     export default {
 
@@ -138,8 +140,10 @@
             btnText : { type : String, default : 'Formats'},
             coordtype : { type : String, default : NUM.toString() },
             precision : { type : String, default : EXP.toString() },
+            textMap : { type : String, default : 'Map'},
+            iconMap : { type : String, default : ''},
             // google-api properties
-            apikey : { type : String, default: '' },
+            usemap : { type : Boolean, default: false },
             apilat : { type : String, default : '46.49942984' },
             apilong : { type : String, default : '11.3416598' },
             apizoom : { type : String, default : '8' },
@@ -165,6 +169,8 @@
                 modalHeight : window.innerHeight - 30,
                 mlat : '',
                 mlong : '',
+                mlatvalue : '',
+                mlongvalue : '',
                 center : {},
                 mzoom : parseInt(this.apizoom),
             }
@@ -193,8 +199,8 @@
             },
 
             mok : function() {
-                this.recalcLat(this.mlat);
-                this.recalcLong(this.mlong);
+                this.recalcLat(this.mlatvalue);
+                this.recalcLong(this.mlongvalue);
                 this.$refs.apimodal.action(false,3);
             },
 
@@ -208,8 +214,8 @@
 
             medit : function() {
                 this.$nextTick(function() {
-                    var lat = this.parse(this.mlat, false);
-                    var long = this.parse(this.mlong, false);
+                    var lat = this.parse(this.mlatvalue, false);
+                    var long = this.parse(this.mlongvalue, false);
                     this.setCenter(lat,long);
                 });
             },
@@ -218,6 +224,8 @@
                 this.$nextTick(function() {
                     // set to actual map-center (no 2-way-binding for this.center)
                     this.center = { lat : this.round(this.mlat,this.precision), lng : this.round(this.mlong,this.precision) };
+                    // values
+                    this.setModalValues();
                     // set to new center
                     this.$nextTick(function() {
                         if ( lat && long) {
@@ -230,6 +238,14 @@
             getCenter : function(center) {
                 this.mlat = this.round(center.lat(),this.precision).toString();
                 this.mlong = this.round(center.lng(),this.precision).toString();
+                this.setModalValues();
+            },
+
+            setModalValues : function() {
+                var mlats = this.calcCoords(this.mlat, 'lat'); 
+                var mlongs = this.calcCoords(this.mlong, 'long'); 
+                this.mlatvalue = mlats[this.type];
+                this.mlongvalue = mlongs[this.type];
             },
 
             recalcLat : function(coord) {
@@ -337,14 +353,12 @@
                 var part = coord.split("'");
                 if (part[1]) {
                     sec = parseFloat(part[1]);
-                    type = SEC;
                 }
                 //console.log(sec);
                 // check for minutes (at degree-sign)
                 var part = part[0].split("°");
                 if (part[1]) {
                     min = parseFloat(part[1]);
-                    type = MIN;
                 }
                 //console.log(min);
                 // degrees
@@ -352,7 +366,7 @@
                 //console.log(deg);
                 //console.log(sign)
                 if (settype) {
-                    this.type = type;
+                    this.type = sec > 0 ? SEC : min > 0 ? MIN : type;
                 }
                 return this.round(sign * (deg + min / 60 + sec / 3600),this.precision);
             },
@@ -405,10 +419,15 @@
                 height:150px;
                 justify-content: center;
                 align-items: center;
+                flex-direction: column;
 
-                span {
+                .btn-map.glyphicon {
                     font-size: 5em;
-                    display:block;
+                }
+
+                .btn-text-map {
+                    color:black;
+                    margin-top:5px;
                 }
             }
         }
