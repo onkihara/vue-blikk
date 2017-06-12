@@ -57,7 +57,7 @@ export default {
 			this.btnDisabled = this.disabled;
 		},
 		value() {
-			this.val = this.value;
+			this.old = this.val = this.value;
 		}
 	},
 
