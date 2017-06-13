@@ -10,10 +10,10 @@
                     :placeholder="placeholderLat" 
                     :btn-text="btnText"
                     :disabled="disabled"
-                    @blur="recalcLat" 
+                    @blur="blur('lat',$event)" 
                     @esc="esc"
                     @selected="selectedLat"
-                    @changed="recalcLat"
+                    @enter="enterLat"
                 ></dropdown-input>
             </div>
             <div class="form-group">
@@ -24,10 +24,10 @@
                     :placeholder="placeholderLong" 
                     :btn-text="btnText"
                     :disabled="disabled"
-                    @blur="recalcLong" 
+                    @blur="blur('long',$event)" 
                     @esc="esc"
                     @selected="selectedLong"
-                    @changed="recalcLong"
+                    @enter="enterLong"
                 ></dropdown-input>
             </div>
         </div>
@@ -40,6 +40,7 @@
         </div>
 
         <modal v-model="apiOpen" ref="apimodal" @opened="mopened" class="apicontainer">
+
             <span slot="title">{{ apititle }}</span>
 
             <gmap-map class="mapcontainer" 
@@ -103,12 +104,7 @@
         },
 
         mounted() {
-            if (this.longitude) {
-                this.recalcLong(this.longitude,false);
-            }
-            if (this.latitude) {
-                this.recalcLat(this.latitude,false);
-            }
+            this.init();
             // set center-coords
             this.minit();
         },
@@ -202,6 +198,13 @@
                 this.recalcLat(this.mlatvalue);
                 this.recalcLong(this.mlongvalue);
                 this.$refs.apimodal.action(false,3);
+                this.apiOpen = false;
+                // has to be delayed in order to close the modal-map !?
+                this.$nextTick(() => { 
+                    _.delay(() => {
+                        this.$emit('changed', { lat: this.lat, long : this.long, type : this.type });
+                    },500);
+                });
             },
 
             mcancel : function() {
@@ -218,6 +221,15 @@
                     var long = this.parse(this.mlongvalue, false);
                     this.setCenter(lat,long);
                 });
+            },
+
+            init : function() {
+                if (this.longitude) {
+                    this.recalcLong(this.longitude,false);
+                }
+                if (this.latitude) {
+                    this.recalcLat(this.latitude,false);
+                }
             },
 
             setCenter : function(lat,long) {
@@ -248,7 +260,7 @@
             },
 
             recalcLat : function(coord, settype=true) {
-                coord = coord || this.lat;
+                coord = coord || this.latvalue;
                 var lat = this.parse(coord,settype);
                 // Plausibilität
                 if (Math.abs(lat) > 90.0) {
@@ -263,7 +275,7 @@
             },
 
             recalcLong : function(coord, settype=true) {
-                coord = coord || this.long;
+                coord = coord || this.longvalue;
                 var long = this.parse(coord,settype);
                 // Plausibilität
                 if (Math.abs(long) > 180.0) {
@@ -283,19 +295,35 @@
                 return { lat :  mlats[type], long : mlongs[type] };
             },
 
-            esc(data) {
-                this.$emit('esc');
+            esc : function(data) {
+                this.$emit('esc',data);
+                this.init();
             },
 
-            selectedLat(data, type) {
+            enterLat : function(data) {
+                this.recalcLat(data);
+                this.$emit('enter',{ lat : this.lat, long : this.long, type : this.type });
+            },
+
+           enterLong : function(data) {
+                this.recalcLong(data);
+                this.$emit('enter',{ lat : this.lat, long : this.long, type : this.type });
+            },
+
+            blur : function(latlong, data) {
+                if ( ! data) return;
+                latlong == 'lat' ? this.recalcLat(data) : this.recalcLong(data);
+            },
+
+            selectedLat : function(data, type) {
                 this.type = type;
             },
 
-            selectedLong(data, type) {
+            selectedLong : function(data, type) {
                 this.type = type;
             },
 
-            calcCoords(coords, latorlong) {
+            calcCoords : function(coords, latorlong) {
                 if (coords == '') {
                     return { NUM : null, DEG : null, MIN : null, SEC : null };
                 }
@@ -323,7 +351,7 @@
                 return c;
             },
 
-            parse(coord, settype=true) {
+            parse : function(coord, settype=true) {
                 coord = ''+coord;
                 // test for cardinal point (N,E,S,W)
                 var cardinalpoint, s = '';
@@ -379,7 +407,7 @@
                 return this.round(sign * (deg + min / 60 + sec / 3600),this.precision);
             },
 
-            round(value, exp) {
+            round : function(value, exp) {
                 if (typeof exp === 'undefined' || +exp === 0)
                     return Math.round(value);
                 value = +value;

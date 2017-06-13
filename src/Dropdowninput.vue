@@ -88,7 +88,7 @@ export default {
 			this.$emit('esc',this.val); 
 			this.showDropdown = false; 
 		},
-		enter() { this.$emit('changed',this.val); }
+		enter() { this.$emit('enter',this.val); }
 	}
 }
 </script>

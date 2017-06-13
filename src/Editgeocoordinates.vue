@@ -5,10 +5,10 @@
 
             <slot>
                 <span class="geo-coords">
-                    <label>{{ labelLat }}</label>: <span>{{ lat }}</span>
+                    <label>{{ labelLat }}</label>: <span>{{ formattedLat }}</span>
                 </span>            
                 <span class="geo-coords">
-                    <label>{{ labelLong }}</label>: <span>{{ long }}</span>
+                    <label>{{ labelLong }}</label>: <span>{{ formattedLong }}</span>
                 </span>            
             </slot>
 
@@ -31,7 +31,7 @@
             :longitude="long" 
             :latitude="lat"
             :airts="airts" 
-            :coordtype="coordtype"
+            :coordtype="type"
             :btn-text = "btnText"
             :usemap="usemap" 
             :apilat="apilat" 
@@ -45,6 +45,8 @@
             :text-map="textMap"
             :icon-map="iconMap"
             @esc="esc"
+            @enter="enter"
+            @changed="enter"
         ></geo-input>   
      
     </div>
@@ -55,11 +57,16 @@
     import Axios from 'axios';
     import _ from 'lodash';
     import Geocoordinatesinput from './Geocoordinatesinput.vue';
+    import ClickOutside from './directives/ClickOutside.js';
 
     const NUM = 1;
     const EXP = 8; // Nachkommastellen export default {
 
     export default {
+
+        directives: {
+            ClickOutside
+        },
 
         components : {
             'geo-input' : Geocoordinatesinput
@@ -67,10 +74,9 @@
 
         mounted() {
             // get right formats
-            var coords = this.$refs.geoinput.getFormatted(this.latitude,this.longitude,this.coordtype);
-            this.setCoords(coords);
+            this.setFormattedCoords();
             // show input if void
-            if (typeof this.lat == 'undefined' && this.autoEdit) {
+            if (this.lat == '' && this.autoEdit) {
                 this.editor = true;
             }
         },
@@ -113,10 +119,12 @@
         data : function() {
             return {
                 editor : false,
-                lat : null,
-                long : null,
-                oldlat : null,
-                oldlong : null,
+                lat : this.latitude,
+                long : this.longitude,
+                oldlat : this.latitude,
+                oldlong : this.longitude,
+                formattedLat : null,
+                formattedLong : null,
                 type : this.coordtype
             }
         },
@@ -125,22 +133,66 @@
 
             edit() {
                 this.editor = ! this.editor;
-                if (this.editor && this.oldlat) {
-                    this.lat = this.oldlat;
-                    this.long = this.oldlong;
-                }
-            },
+             },
 
             esc() {
                 this.lat = this.oldlat;
                 this.long = this.oldlong;
+                this.leave();
+            },
+
+            enter(coords) {
+                this.lat = coords.lat.toString();
+                this.long = coords.long.toString();
+                this.type = coords.type.toString();
+                this.leave();
+                this.store();
+            },
+
+            leave() {
+                this.setFormattedCoords();
                 this.editor = false;
             },
 
-            setCoords(coords) {
-                this.oldlat = this.lat = coords.lat;
-                this.oldlong = this.long = coords.long;
-            }
+            setFormattedCoords() {
+                var coords = this.getCoords();
+                this.formattedLat = coords.lat;
+                this.formattedLong = coords.long;
+            },
+
+            getCoords() {
+                return this.$refs.geoinput.getFormatted(this.lat,this.long,this.type);
+            },
+
+            store : function() {
+                // save only changes
+                if (this.lat != this.oldlat || this.long != this.oldlong) {
+                    // http-request
+                    var data = {};
+                    data[this.nameLat] = this.lat;
+                    data[this.nameLong] = this.long;
+                    data[this.nameFormatType] = this.type;
+                    console.log(data);return;
+                    var me = this;
+                    Axios.put(this.href, data)
+                        .then(function (response) {
+                            me.styleerror['backgroundColor'] = me.colordone;
+                            me.status = 'done';
+                            me.cleardone();
+                            // remember new
+                            me.old = me.val;
+                            me.callbackdone(response);
+                        })
+                        .catch(function (error) {
+                            me.styleerror['backgroundColor'] = me.colorerror;
+                            me.status = 'error';
+                            me.clearerror();
+                            // restore old
+                            me.reset();
+                            me.callbackerror(error);
+                        });
+                }
+            },
 
         }
     }

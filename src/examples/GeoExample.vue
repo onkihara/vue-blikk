@@ -108,7 +108,7 @@
 				latitude : '43.245215',
 				longitude1 : "",
 				latitude1 : '',
-				type : '4',
+				type : '2',
 				sourceurl : '',
 				generatorurl : 'debug'
 			}
