@@ -5,6 +5,7 @@
             <div class="form-group">
                 <label for="lat">{{ labelLat }}</label>
                 <dropdown-input
+                    ref="input1"
                     v-model="latvalue" 
                     :data="lats" 
                     :placeholder="placeholderLat" 
@@ -19,6 +20,7 @@
             <div class="form-group">
                 <label for="long">{{ labelLong }}</label>
                 <dropdown-input
+                    ref="input2"
                     v-model="longvalue" 
                     :data="longs" 
                     :placeholder="placeholderLong" 
@@ -34,9 +36,13 @@
 
         <div class="apiright" v-if="usemap">
             <a slot="map-icon" @click.prevent="openModal">
-                <span class="btn-map glyphicon glyphicon-globe">{{ iconMap }}</span>
+                <span class="btn-map glyphicon glyphicon-globe">{{ iconMap }}</span><br />
                 <span class="btn-text-map">{{ textMap }}</span>
-            </a>           
+            </a>   
+            <div class="cb-buttons" v-if="cbButtons">
+                <button class="btn btn-xs btn-primary" @click="ok">OK</button> 
+                <button class="btn btn-xs btn-default" @click="cancel">Cancel</button>
+            </div>        
         </div>
 
         <modal v-model="apiOpen" ref="apimodal" @opened="mopened" class="apicontainer">
@@ -107,6 +113,9 @@
             this.init();
             // set center-coords
             this.minit();
+            // custom-callbacks
+            if (this.cbCancel) { this.cancel = this.cbCancel };
+            if (this.cbOk) { this.ok = this.cbOk };
         },
 
         watch : {
@@ -119,7 +128,7 @@
                 }
             }
 
-           },
+        },
 
          props : {
             // coordinates properties
@@ -146,7 +155,11 @@
             apititle : { type : String, default : 'Choose coordinates ...' },
             apicancel : { type : String, default : 'Cancel' },
             apiok : { type : String, default : 'Save' },
-            apireset : { type : String, default : 'Reset'}
+            apireset : { type : String, default : 'Reset'},
+            // callables
+            cbButtons : { type : Boolean, default : false },
+            cbOk : { type : Function, default : null },
+            cbCancel : { type : Function, default : null },
         },
 
         data : function() {
@@ -169,6 +182,8 @@
                 mlongvalue : '',
                 center : {},
                 mzoom : parseInt(this.apizoom),
+                cancel : this.escAll,
+                ok : this.enter
             }
         },
 
@@ -300,14 +315,25 @@
                 this.init();
             },
 
-            enterLat : function(data) {
-                this.recalcLat(data);
-                this.$emit('enter',{ lat : this.lat, long : this.long, type : this.type });
+            escAll : function() {
+                this.$refs.input1.esc();
+                this.$refs.input2.esc();
             },
 
-           enterLong : function(data) {
+            enterLat : function(data) {
+                this.recalcLat(data);
+                this.enter();
+            },
+
+            enterLong : function(data) {
                 this.recalcLong(data);
-                this.$emit('enter',{ lat : this.lat, long : this.long, type : this.type });
+                this.enter();
+            },
+
+            enter : function() {
+                this.$nextTick(() => {
+                    this.$emit('enter',{ lat : this.lat, long : this.long, type : this.type });
+                })
             },
 
             blur : function(latlong, data) {
@@ -432,7 +458,7 @@
     $kornsize: 30px;
 
     .geo-coordinates {
-        
+
         .degbuttons {
             margin-top:40px;
             text-align:right;
@@ -445,17 +471,18 @@
 
         .apiright {
             width:30%;
+            height:135px;
             float:left;
+            text-align:center;
+            display:flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
 
             a {
                 text-decoration: none;
-                display:flex;
                 cursor:pointer;
                 width:100%;
-                height:150px;
-                justify-content: center;
-                align-items: center;
-                flex-direction: column;
 
                 .btn-map.glyphicon {
                     font-size: 5em;
@@ -465,6 +492,10 @@
                     color:black;
                     margin-top:5px;
                 }
+            }
+
+            .cb-buttons {
+                margin-top:10px;
             }
         }
 

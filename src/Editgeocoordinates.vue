@@ -44,10 +44,15 @@
             :apireset="apireset"
             :text-map="textMap"
             :icon-map="iconMap"
+            :cb-buttons="cbButtons"
+            :cb-ok="cbOk"
+            :cb-cancel="cbCancel"
             @esc="esc"
             @enter="enter"
             @changed="enter"
         ></geo-input>   
+
+
      
     </div>
 </template>
@@ -112,6 +117,10 @@
             apicancel : { type : String, default : 'Cancel' },
             apiok : { type : String, default : 'Save' },
             apireset : { type : String, default : 'Reset'},
+            // callables
+            cbButtons : { type : Boolean, default : false },
+            cbOk : { type : Function, default : null },
+            cbCancel : { type : Function, default : null },
             // editor
             autoEdit : { type : Boolean, default: true }
         },

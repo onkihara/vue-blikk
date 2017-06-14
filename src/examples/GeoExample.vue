@@ -51,6 +51,7 @@
 		apiok="Übernehmen" 
 		apicancel="Abbrechen"
 		:auto-edit="true"
+		:cb-buttons="true"
 	></edit-geo-coordinates>
 
 	<!-- <hr style="clear:both" />
@@ -110,7 +111,7 @@
 				latitude1 : '',
 				type : '2',
 				sourceurl : '',
-				generatorurl : 'debug'
+				generatorurl : 'debug',
 			}
 		}
 	}
@@ -135,5 +136,9 @@
 
 	a {
 		color: #CC0000;
+	}
+
+	hr {
+		clear:both;
 	}
 </style>
