@@ -1,5 +1,5 @@
 <template>
-    <div class="geo-coordinates">
+    <div class="geo-coordinates-input">
 
         <div :class="{ apileft : usemap }">
             <div class="form-group">
@@ -40,8 +40,8 @@
                 <span class="btn-text-map">{{ textMap }}</span>
             </a>   
             <div class="cb-buttons" v-if="cbButtons">
-                <button class="btn btn-xs btn-primary" @click="ok">OK</button> 
-                <button class="btn btn-xs btn-default" @click="cancel">Cancel</button>
+                <button class="btn btn-xs btn-primary" @click="ok"><slot name="btn-ok"><span class="glyphicon glyphicon-ok"></span></slot></button> 
+                <button class="btn btn-xs btn-default" @click="cancel"><slot name="btn-cancel"><span class="glyphicon glyphicon-remove"></span></slot></button>
             </div>        
         </div>
 
@@ -165,8 +165,8 @@
         data : function() {
             return {
                 // coordinates data
-                long : 0,
-                lat : 0,
+                long : null,
+                lat : null,
                 longs : {},
                 lats : {},
                 longvalue : '',
@@ -350,7 +350,7 @@
             },
 
             calcCoords : function(coords, latorlong) {
-                if (coords == '') {
+                if (coords == '' || coords === null) {
                     return { NUM : null, DEG : null, MIN : null, SEC : null };
                 }
                 var sign = coords < 0 ? -1 : 1;
@@ -457,7 +457,7 @@
 
     $kornsize: 30px;
 
-    .geo-coordinates {
+    .geo-coordinates-input {
 
         .degbuttons {
             margin-top:40px;
@@ -471,7 +471,7 @@
 
         .apiright {
             width:30%;
-            height:135px;
+            height:133px;
             float:left;
             text-align:center;
             display:flex;

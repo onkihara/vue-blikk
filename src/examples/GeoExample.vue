@@ -25,6 +25,7 @@
 		apititle="Wählen Sie hier die Koordinaten ..."
 		apiok="Übernehmen" 
 		apicancel="Abbrechen"
+		:useviewmap="true"
 	>
 	</edit-geo-coordinates>
 
@@ -124,7 +125,7 @@
 	$icon-font-path: "~bootstrap-sass/assets/fonts/bootstrap/";
 	@import "~bootstrap-sass/assets/stylesheets/bootstrap";
 
-	.geo-coordinates {
+	.geo-coordinates-input {
 		width:50%;
 		margin:auto;
 	}

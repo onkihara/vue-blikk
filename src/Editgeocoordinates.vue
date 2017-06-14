@@ -4,13 +4,13 @@
         <div class="geo-edit" v-if="!editor">
 
             <slot>
-                <span class="geo-coords">
-                    <label>{{ labelLat }}</label>: <span>{{ formattedLat }}</span>
-                </span>            
-                <span class="geo-coords">
-                    <label>{{ labelLong }}</label>: <span>{{ formattedLong }}</span>
-                </span>            
-            </slot>
+                <geo-view 
+                    :label-lat="labelLat" 
+                    :label-long="labelLong" 
+                    :latitude="formattedLat" 
+                    :longitude="formattedLong"
+                    :useviewmap="useviewmap"
+                ></geo-view></slot>
 
             <a @click="edit" class="">
                 <slot name="editicon"><span class="editicon">[edit]</span></slot>
@@ -47,10 +47,13 @@
             :cb-buttons="cbButtons"
             :cb-ok="cbOk"
             :cb-cancel="cbCancel"
+            :useviewmap="useviewmap"
             @esc="esc"
             @enter="enter"
             @changed="enter"
-        ></geo-input>   
+        >
+            <span slot="btn-ok">OK</span>
+        </geo-input>   
 
 
      
@@ -61,6 +64,7 @@
 
     import Axios from 'axios';
     import _ from 'lodash';
+    import Geocoordinates from './Geocoordinates.vue';
     import Geocoordinatesinput from './Geocoordinatesinput.vue';
     import ClickOutside from './directives/ClickOutside.js';
 
@@ -74,6 +78,7 @@
         },
 
         components : {
+            'geo-view' : Geocoordinates,
             'geo-input' : Geocoordinatesinput
         },
 
@@ -122,7 +127,9 @@
             cbOk : { type : Function, default : null },
             cbCancel : { type : Function, default : null },
             // editor
-            autoEdit : { type : Boolean, default: true }
+            autoEdit : { type : Boolean, default: true },
+            // viewer
+            useviewmap : { type : Boolean, default : false }
         },
 
         data : function() {
@@ -151,8 +158,8 @@
             },
 
             enter(coords) {
-                this.lat = coords.lat.toString();
-                this.long = coords.long.toString();
+                this.lat = coords.lat !== null ? coords.lat.toString() : null;
+                this.long = coords.long !== null ? coords.long.toString() : null;
                 this.type = coords.type.toString();
                 this.leave();
                 this.store();
@@ -215,16 +222,11 @@
             margin:auto;
             position:relative;
             
-           .geo-coords {
-                display:block;
-                font-size:110%;
-            }
-
             .editicon {
-               display:inline-block;
+                display:inline-block;
                 font-size:90%;
                 position:absolute;
-                right:0px;
+                right:-30px;
                 top:0px;
                 cursor:pointer;
             }
