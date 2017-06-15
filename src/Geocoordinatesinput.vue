@@ -45,20 +45,22 @@
             </div>        
         </div>
 
-        <modal v-model="apiOpen" ref="apimodal" @opened="mopened" class="apicontainer">
+        <map-modal 
+            v-model="apiOpen" 
+            ref="apimodal" 
+            class="apicontainer" 
+            :apilat="apilat" 
+            :apilong="apilong"
+            :apizoom="apizoom"
+            :latitude="lat"
+            :longitude="long"
+            @cancel="mclosed"
+            @center_changed="mchanged"
+        >
 
             <span slot="title">{{ apititle }}</span>
 
-            <gmap-map class="mapcontainer" 
-                ref="map" 
-                @center_changed="getCenter" 
-                map-type-id="roadmap" 
-                :center="center" 
-                :zoom="mzoom">
-            </gmap-map>
-
-            <div class="kimme"><span @click="mok" class="korn glyphicon glyphicon-screenshot"></span></div>
-            <div slot="modal-footer" class="modal-footer">
+            <div slot="modal-footer">
                 <div class="form-group">
                     <label>{{ labelLat }}
                         <input class="form-control" @blur="medit" @keydown.enter="medit" type="text" v-model="mlatvalue" />
@@ -71,7 +73,7 @@
                     <button type="button" @click="mcancel" class="btn btn-default">{{ apicancel }}</button>
                 </div>
             </div>
-        </modal>
+        </map-modal>
 
         <input type="hidden" :name="nameLat" :value="lat" />
         <input type="hidden" :name="nameLong" :value="long" />
@@ -85,34 +87,24 @@
     import Axios from 'axios';
     import _ from 'lodash';
     import Ddinput from './Dropdowninput.vue';
-    import Modal from './Modal.vue';
-    import Vue from 'vue';
-    import * as VueGoogleMaps from 'vue2-google-maps';
+    import Mapmodal from './Mapmodal.vue';
 
     const NUM = 1;
     const DEG = 2;
     const MIN = 3;
     const SEC = 4;
     const EXP = 8; // Nachkommastellen
-    const APILOADER = { load : { key : 'AIzaSyD5LTJK9n2N-ahjfGqwutnt_7fPpXKpR8s'}} // google-api-key
-
-    if (window != 'undefined' && window.Vue) {
-        window.Vue.use(VueGoogleMaps, APILOADER);
-    } else {
-        Vue.use(VueGoogleMaps, APILOADER);
-    }
-
+    const ZOOM = 8;
+ 
     export default {
 
         components : {
             'dropdown-input' : Ddinput,
-            'modal' : Modal
+            'map-modal' : Mapmodal
         },
 
         mounted() {
             this.init();
-            // set center-coords
-            this.minit();
             // custom-callbacks
             if (this.cbCancel) { this.cancel = this.cbCancel };
             if (this.cbOk) { this.ok = this.cbOk };
@@ -151,7 +143,7 @@
             usemap : { type : Boolean, default: false },
             apilat : { type : String, default : '46.49942984' },
             apilong : { type : String, default : '11.3416598' },
-            apizoom : { type : String, default : '8' },
+            apizoom : { type : String, default : ZOOM.toString() },
             apititle : { type : String, default : 'Choose coordinates ...' },
             apicancel : { type : String, default : 'Cancel' },
             apiok : { type : String, default : 'Save' },
@@ -175,7 +167,6 @@
                 type : this.coordtype,
                 // api-data
                 apiOpen : false,
-                modalHeight : window.innerHeight - 30,
                 mlat : '',
                 mlong : '',
                 mlatvalue : '',
@@ -191,28 +182,12 @@
 
             openModal : function() {
                 this.apiOpen = true;
-                this.$refs.apimodal.$refs.modaldialog.style.height = this.modalHeight + 'px';
              },
-
-            minit : function() {
-                // set center from data or props
-                if (this.long && this.lat) {
-                    this.setCenter(this.lat,this.long);
-                } else {
-                    this.setCenter(this.apilat,this.apilong);
-                }
-             },
-
-            mopened : function() {
-                // trigger map resize after modal shown!
-                google.maps.event.trigger(this.$refs.map.$mapObject, 'resize');
-                this.minit();
-            },
 
             mok : function() {
                 this.recalcLat(this.mlatvalue);
                 this.recalcLong(this.mlongvalue);
-                this.$refs.apimodal.action(false,3);
+                //this.$refs.apimodal.action(false,3);
                 this.apiOpen = false;
                 // has to be delayed in order to close the modal-map !?
                 this.$nextTick(() => { 
@@ -223,18 +198,29 @@
             },
 
             mcancel : function() {
-                this.$refs.apimodal.action(false,3);
+                this.$refs.apimodal.cancel();
+                this.mclosed();
             },
 
             mreset : function() {
-                this.setCenter(this.lat,this.long);
+                this.$refs.apimodal.resetCenter();
+            },
+
+            mclosed : function() {
+                this.apiOpen = false;
+            },
+
+            mchanged : function(coords) {
+                this.mlat = coords.lat;
+                this.mlong = coords.lng;
+                this.setModalValues();
             },
 
             medit : function() {
                 this.$nextTick(function() {
                     var lat = this.parse(this.mlatvalue, false);
                     var long = this.parse(this.mlongvalue, false);
-                    this.setCenter(lat,long);
+                    //this.setCenter(lat,long);
                 });
             },
 
@@ -245,27 +231,6 @@
                 if (this.latitude) {
                     this.recalcLat(this.latitude,false);
                 }
-            },
-
-            setCenter : function(lat,long) {
-                this.$nextTick(function() {
-                    // set to actual map-center (no 2-way-binding for this.center)
-                    this.center = { lat : this.round(this.mlat,this.precision), lng : this.round(this.mlong,this.precision) };
-                    // values
-                    this.setModalValues();
-                    // set to new center
-                    this.$nextTick(function() {
-                        if ( lat && long) {
-                            this.center = { lat : this.round(lat,this.precision), lng : this.round(long,this.precision) };
-                        }
-                    });
-                });
-            },
-
-            getCenter : function(center) {
-                this.mlat = this.round(center.lat(),this.precision).toString();
-                this.mlong = this.round(center.lng(),this.precision).toString();
-                this.setModalValues();
             },
 
             setModalValues : function() {
@@ -365,7 +330,7 @@
                 } else {
                     airt = sign < 0 ? airts[2] : airts[0];
                 }
-                c[DEG] = airt + ' ' + coords + '°';
+                c[DEG] = airt + ' ' + this.round(coords,this.precision) + '°';
                 // calc MIN
                 var minprecision = this.precision - 2 > 0 ? this.precision - 2 : 0;
                 var min = this.round((coords - Math.trunc(coords)) * 60,minprecision);
@@ -455,8 +420,6 @@
 
 <style lang="scss">
 
-    $kornsize: 30px;
-
     .geo-coordinates-input {
 
         .degbuttons {
@@ -499,39 +462,6 @@
             }
         }
 
-        .modal-dialog {
-            width:98%;
-            margin-top:15px;
-
-            .modal-content {
-                height:100%;
-            }
-        }
-
-        .modal-body {
-            height:80%;
-
-            .mapcontainer {
-                width:100%;
-                height:100%;
-            }
-
-            .kimme {
-                position:absolute;
-                top:50%;
-                left:50%;
-                width:10px;
-                height:10px;
-                .korn {
-                    color:rgba(255,0,0,.5);
-                    font-size:$kornsize;
-                    position: absolute;
-                    top:-$kornsize/2;
-                    left:-$kornsize/2;
-                }
-            }
-        }
-
         .modal-footer {
             .form-group {
                 display:flex;
@@ -547,6 +477,7 @@
                 }
             }
         }
-    }
+
+     }
 
  </style>

@@ -3,14 +3,15 @@
 
         <div class="geo-edit" v-if="!editor">
 
-            <slot>
+          <!--   <slot>
                 <geo-view 
                     :label-lat="labelLat" 
                     :label-long="labelLong" 
                     :latitude="formattedLat" 
                     :longitude="formattedLong"
                     :useviewmap="useviewmap"
-                ></geo-view></slot>
+                ></geo-view>
+            </slot> -->
 
             <a @click="edit" class="">
                 <slot name="editicon"><span class="editicon">[edit]</span></slot>
@@ -64,21 +65,16 @@
 
     import Axios from 'axios';
     import _ from 'lodash';
-    import Geocoordinates from './Geocoordinates.vue';
+   // import Geocoordinates from './Geocoordinates.vue';
     import Geocoordinatesinput from './Geocoordinatesinput.vue';
-    import ClickOutside from './directives/ClickOutside.js';
 
     const NUM = 1;
     const EXP = 8; // Nachkommastellen export default {
 
     export default {
 
-        directives: {
-            ClickOutside
-        },
-
         components : {
-            'geo-view' : Geocoordinates,
+            //'geo-view' : Geocoordinates,
             'geo-input' : Geocoordinatesinput
         },
 

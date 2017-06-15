@@ -19,7 +19,7 @@
             </a>   
         </div>  
 
-        <modal v-model="apiOpen" ref="apimodal" @opened="mopened" class="apicontainer">
+       <!--  <modal v-model="apiOpen" ref="apimodal" @opened="mopened" class="apicontainer">
 
             <span slot="title">{{ apititle }}</span>
 
@@ -34,7 +34,7 @@
 
             <div slot="modal-footer" class="modal-footer"></div>
 
-        </modal>
+        </modal> -->
        
 
      </div>
@@ -58,7 +58,7 @@
     export default {
 
         components : {
-             'modal' : Modal
+             //'modal' : Modal
         },
 
         mounted() {
@@ -149,7 +149,7 @@
                 cursor:pointer;
                 width:100%;
                 display:flex;
-                justify-content:space-around;
+                justify-content:flex-end;
                 align-items:center;
 
                 .btn-map.glyphicon {
@@ -158,60 +158,12 @@
 
                 .btn-text-map {
                     color:black;
-                    margin-top:5px;
+                    margin:5px;
                 }
             }
         }
 
-        .modal-dialog {
-            width:98%;
-            margin-top:15px;
-
-            .modal-content {
-                height:100%;
-            }
-        }
-
-        .modal-body {
-            height:80%;
-
-            .mapcontainer {
-                width:100%;
-                height:100%;
-            }
-
-            .kimme {
-                position:absolute;
-                top:50%;
-                left:50%;
-                width:10px;
-                height:10px;
-                .korn {
-                    color:rgba(255,0,0,.5);
-                    font-size:$kornsize;
-                    position: absolute;
-                    top:-$kornsize/2;
-                    left:-$kornsize/2;
-                }
-            }
-        }
-
-        .modal-footer {
-            .form-group {
-                display:flex;
-                justify-content: flex-end;
-                align-items: flex-end;
-                label {
-                    text-align:left;
-                    margin-left:5px;
-                }
-                button {
-                    margin-left:5px;
-                    margin-bottom: 5px;
-                }
-            }
-        }
-        
+         
     }
 
  </style>

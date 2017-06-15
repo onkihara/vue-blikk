@@ -29,9 +29,9 @@
 	>
 	</edit-geo-coordinates>
 
-<hr>
+	<hr>
 
-<edit-geo-coordinates 
+	<edit-geo-coordinates 
 		name-long="long" 
 		name-lat="lat" 
 		name-format-type="ftype"
@@ -41,11 +41,11 @@
 		label-lat="Breite"
 		longitude="" 
 		latitude=""
-		coordtype="4"
+		coordtype="2"
 		btn-text = "Formate"
 		:usemap="true" 
-		apilat="46.49943169" 
-		apilong="11.34164907"
+		apilat="46.499446" 
+		apilong="11.341657"
 		apizoom="9"
 		precision="6"
 		apititle="Wählen Sie hier die Koordinaten ..."
