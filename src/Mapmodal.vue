@@ -52,14 +52,26 @@
         },
 
         mounted() {
-           this.minit();
+            // adjust height
+            this.$refs.modal.$refs.modaldialog.style.height = this.modalHeight + 'px';
         },
 
         watch : {
             value (val, old) {
                 if (val !== old) { this.open = val }
             },
-            
+            latitude(val, old) {
+                if (this.open && val !== old) {
+                    this.lat = val;
+                    this.setCenter(val,this.long);
+                }
+            },
+            longitude(val, old) {
+                if (this.open && val !== old) {
+                    this.long = val;
+                    this.setCenter(this.lat,val);
+                }
+            }
         },
 
          props : {
@@ -80,7 +92,7 @@
                 alat : 0.0,
                 along : 0.0,
                 zoom : parseInt(this.apizoom),
-                center : {},
+                center : { lat : 0.0, lng : 0.0 },
             }
         },
 
@@ -89,18 +101,15 @@
             mopened : function() {
                 // trigger map resize after modal shown!
                 google.maps.event.trigger(this.$refs.map.$mapObject, 'resize');
-                this.setCenter(this.lat, this.long);
-            },
-
-            minit : function() {
-                // set center from data or props
-                if (this.long === null || this.lat === null) {
+                // re-centering for resize changes center!
+                if (this.latitude !== null && this.longitude !== null) {
+                    this.lat = this.latitude;
+                    this.long = this.longitude;
+                } else if (this.long === null || this.lat === null) {
                     this.lat = parseFloat(this.apilat);
                     this.long = parseFloat(this.apilong);
-                } 
+                }
                 this.center = { lat: this.lat, lng : this.long };
-                // adjust height
-                this.$refs.modal.$refs.modaldialog.style.height = this.modalHeight + 'px';
             },
 
             setCenter : function(lat,long) {

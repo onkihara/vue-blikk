@@ -218,9 +218,8 @@
 
             medit : function() {
                 this.$nextTick(function() {
-                    var lat = this.parse(this.mlatvalue, false);
-                    var long = this.parse(this.mlongvalue, false);
-                    //this.setCenter(lat,long);
+                    this.lat = this.parse(this.mlatvalue, false);
+                    this.long = this.parse(this.mlongvalue, false);
                 });
             },
 
