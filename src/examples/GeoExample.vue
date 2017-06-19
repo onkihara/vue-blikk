@@ -14,6 +14,7 @@
 		label-lat="Breite"
 		:longitude="longitude" 
 		:latitude="latitude"
+		zoom="10"
 		airts="N,O,S,W" 
 		:coordtype="type"
 		btn-text = "Formate"

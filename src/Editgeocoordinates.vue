@@ -31,6 +31,7 @@
             :label-lat="labelLat"
             :longitude="long" 
             :latitude="lat"
+            :zoom="zoom"
             :airts="airts" 
             :coordtype="type"
             :btn-text = "btnText"
@@ -97,12 +98,14 @@
             nameLong : { type : String, default : 'long' },
             nameLat : { type : String, default : 'lat' },
             nameFormatType : { type : String, default : 'type' },
+            nameZoom : { type : String, default : 'zoom' },
             labelLong : { type : String, default : 'Longitude' },
             labelLat : { type : String, default : 'Latitude' },
             placeholderLong : { type : String, default : 'Longitude' },
             placeholderLat : { type : String, default : 'Latitude' },
             longitude : { type : String, default : '' },
             latitude : { type : String, default : '' },
+            zoom : { type : String, default : '' },
             airts : { type : String, default: 'N,E,S,W' },
             btnText : { type : String, default : 'Formats'},
             coordtype : { type : String, default : NUM.toString() },
@@ -133,8 +136,10 @@
                 editor : false,
                 lat : this.latitude,
                 long : this.longitude,
+                azoom : this.zoom,
                 oldlat : this.latitude,
                 oldlong : this.longitude,
+                oldzoom : this.zoom,
                 formattedLat : null,
                 formattedLong : null,
                 type : this.coordtype
@@ -150,6 +155,7 @@
             esc() {
                 this.lat = this.oldlat;
                 this.long = this.oldlong;
+                this.zoom = this.oldzoom;
                 this.leave();
             },
 
@@ -157,6 +163,7 @@
                 this.lat = coords.lat !== null ? coords.lat.toString() : null;
                 this.long = coords.long !== null ? coords.long.toString() : null;
                 this.type = coords.type.toString();
+                this.azoom = coords.zoom.toString();
                 this.leave();
                 this.store();
             },
@@ -178,12 +185,13 @@
 
             store : function() {
                 // save only changes
-                if (this.lat != this.oldlat || this.long != this.oldlong) {
+                if (this.lat != this.oldlat || this.long != this.oldlong || this.azoom != this.oldzoom) {
                     // http-request
                     var data = {};
                     data[this.nameLat] = this.lat;
                     data[this.nameLong] = this.long;
                     data[this.nameFormatType] = this.type;
+                    data[this.nameZoom] = this.azoom;
                     console.log(data);return;
                     var me = this;
                     Axios.put(this.href, data)

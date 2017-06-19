@@ -54,8 +54,10 @@
             :apizoom="apizoom"
             :latitude="lat"
             :longitude="long"
+            :zoom="mzoom"
             @cancel="mclosed"
             @center_changed="mchanged"
+            @zoom_changed="mzchanged"
         >
 
             <span slot="title">{{ apititle }}</span>
@@ -127,12 +129,14 @@
             nameLong : { type : String, default : 'long' },
             nameLat : { type : String, default : 'lat' },
             nameFormatType : { type : String, default : 'type' },
+            nameZoom : { type : String, default : 'zoom' },
             labelLong : { type : String, default : 'Longitude' },
             labelLat : { type : String, default : 'Latitude' },
             placeholderLong : { type : String, default : 'Longitude' },
             placeholderLat : { type : String, default : 'Latitude' },
             longitude : { type : String, default : '' },
             latitude : { type : String, default : '' },
+            zoom : { type : String, default : '' },
             airts : { type : String, default: 'N,E,S,W' },
             btnText : { type : String, default : 'Formats'},
             coordtype : { type : String, default : NUM.toString() },
@@ -192,7 +196,7 @@
                 // has to be delayed in order to close the modal-map !?
                 this.$nextTick(() => { 
                     _.delay(() => {
-                        this.$emit('changed', { lat: this.lat, long : this.long, type : this.type });
+                        this.$emit('changed', { lat: this.lat, long : this.long, type : this.type, zoom : this.mzoom });
                     },500);
                 });
             },
@@ -213,7 +217,12 @@
             mchanged : function(coords) {
                 this.mlat = coords.lat;
                 this.mlong = coords.lng;
+                this.mzoom = coords.zoom;
                 this.setModalValues();
+            },
+
+            mzchanged : function(zoom) {
+                this.mzoom = zoom;
             },
 
             medit : function() {
@@ -229,6 +238,9 @@
                 }
                 if (this.latitude) {
                     this.recalcLat(this.latitude,false);
+                }
+                if (this.zoom) {
+                    this.mzoom = parseInt(this.zoom);
                 }
             },
 
@@ -296,7 +308,7 @@
 
             enter : function() {
                 this.$nextTick(() => {
-                    this.$emit('enter',{ lat : this.lat, long : this.long, type : this.type });
+                    this.$emit('enter',{ lat : this.lat, long : this.long, type : this.type, zoom : this.mzoom });
                 })
             },
 

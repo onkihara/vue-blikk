@@ -9,8 +9,9 @@
                 ref="map" 
                 map-type-id="roadmap" 
                 :center="center" 
-                :zoom="zoom"
-                @center_changed="getCenter">
+                :zoom="azoom"
+                @center_changed="getCenter"
+                @zoom_changed="chZoom">
             </gmap-map>
 
             <div class="kimme"><span @click="ok" class="korn glyphicon glyphicon-screenshot"></span></div>
@@ -60,16 +61,22 @@
             value (val, old) {
                 if (val !== old) { this.open = val }
             },
+            // watch changes from outside through properties
             latitude(val, old) {
                 if (this.open && val !== old) {
-                    this.lat = val;
-                    this.setCenter(val,this.long);
+                    this.alat = val;
+                    this.setCenter(val,this.along);
                 }
             },
             longitude(val, old) {
                 if (this.open && val !== old) {
-                    this.long = val;
-                    this.setCenter(this.lat,val);
+                    this.along = val;
+                    this.setCenter(this.alat,val);
+                }
+            },
+            zoom(val, old) {
+                if (this.open && val !== old) {
+                    this.azoom = val;
                 }
             }
         },
@@ -79,7 +86,8 @@
             apilong : { type : String, default : '11.3416598' },
             apizoom : { type : String, default : ZOOM.toString() },
             latitude : { type : Number, default : null },
-            longitude : { type : Number, default : null },            
+            longitude : { type : Number, default : null },  
+            zoom : { type : Number, default : ZOOM },         
             value : { type : Boolean, default : false }
          },
 
@@ -91,7 +99,7 @@
                 long : this.longitude,
                 alat : 0.0,
                 along : 0.0,
-                zoom : parseInt(this.apizoom),
+                azoom : this.zoom,
                 center : { lat : 0.0, lng : 0.0 },
             }
         },
@@ -105,9 +113,11 @@
                 if (this.latitude !== null && this.longitude !== null) {
                     this.lat = this.latitude;
                     this.long = this.longitude;
+                    this.azoom = this.zoom;
                 } else if (this.long === null || this.lat === null) {
                     this.lat = parseFloat(this.apilat);
                     this.long = parseFloat(this.apilong);
+                    this.azoom = parseInt(this.apizoom);
                 }
                 this.center = { lat: this.lat, lng : this.long };
             },
@@ -127,17 +137,24 @@
 
             resetCenter : function() {
                 this.setCenter(this.lat, this.long);
+                this.azoom = this.zoom;
             },
 
             getCenter : function(center) {
                 this.alat = center.lat();
                 this.along = center.lng();
-                this.$emit('center_changed', { lat : this.alat, lng : this.along, zoom : this.zoom });
+                this.$emit('center_changed', { lat : this.alat, lng : this.along, zoom : this.azoom });
+            },
+
+            chZoom : function(zoom) {
+                console.log(this.zoom)
+                this.azoom = zoom;
+                this.$emit('zoom_changed',zoom);
             },
 
             ok : function() {
                 this.open = false;
-                this.$emit('ok', { lat : this.alat, lng : this.along, zoom : this.zoom });
+                this.$emit('ok', { lat : this.alat, lng : this.along, zoom : this.azoom });
             },
 
             cancel : function() {
