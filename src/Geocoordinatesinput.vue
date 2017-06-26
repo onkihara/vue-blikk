@@ -203,6 +203,7 @@
 
             mcancel : function() {
                 this.$refs.apimodal.cancel();
+                this.mreset();
                 this.mclosed();
             },
 
@@ -332,7 +333,7 @@
                 var sign = coords < 0 ? -1 : 1;
                 var airts = this.airts.split(',');
                 var c = {};
-                c[NUM] = '' + coords;
+                c[NUM] = '' + this.round(coords,this.precision);
                 // calc DEG
                 coords = Math.abs(coords);
                 var airt;
@@ -433,18 +434,21 @@
 
     .geo-coordinates-input {
 
+        display:flex;
+        align-items: center;
+
         .degbuttons {
             margin-top:40px;
             text-align:right;
         }
 
         .apileft {
-            width:70%;
+            flex:3;
             float:left;
         }
 
         .apiright {
-            width:30%;
+            flex:1;
             height:133px;
             float:left;
             text-align:center;

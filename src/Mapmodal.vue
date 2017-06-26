@@ -1,7 +1,7 @@
 <template>
     <div class="map-modal">
 
-        <modal v-model="open" ref="modal" @opened="mopened" @closed="closed" @ok="ok" @cancel="cancel" class="apicontainer">
+        <modal v-model="open" ref="modal" @opened="mopened" @closed="closed" @cancel="cancel" class="apicontainer">
 
             <span slot="title"><slot name="title"></slot></span>
 
@@ -19,8 +19,8 @@
             <div slot="modal-footer" class="modal-footer">
                 <slot name="modal-footer">
                     <div class="form-group">
-                        <button class="btn btn-primary" @click="ok">OK</button>
-                        <button class="btn btn-default" @click="cancel">Close</button>
+                        <button v-if="callbackOk" class="btn btn-primary" @click="ok">{{ textOk }}</button>
+                        <button class="btn btn-default" @click="cancel">{{ textCancel }}</button>
                     </div>
                 </slot>
             </div>
@@ -38,7 +38,8 @@
     import * as VueGoogleMaps from 'vue2-google-maps';
 
     const ZOOM = 8;
-    const APILOADER = { load : { key : 'AIzaSyD5LTJK9n2N-ahjfGqwutnt_7fPpXKpR8s'}}; // google-api-key
+    const GOOGLEMAPSAPIKEY = 'AIzaSyD5LTJK9n2N-ahjfGqwutnt_7fPpXKpR8s';
+    const APILOADER = { load : { key : GOOGLEMAPSAPIKEY }};
 
     if (window != 'undefined' && window.Vue) {
         window.Vue.use(VueGoogleMaps, APILOADER);
@@ -88,7 +89,11 @@
             latitude : { type : Number, default : null },
             longitude : { type : Number, default : null },  
             zoom : { type : Number, default : ZOOM },         
-            value : { type : Boolean, default : false }
+            disabled : { type : Boolean, default : false },         
+            value : { type : Boolean, default : false },
+            callbackOk : { type : Function, default : null },
+            textOk : { type : String, default : 'Ok' },
+            textCancel : { type : String, default : 'Close' },
          },
 
         data : function() {
@@ -107,19 +112,26 @@
         methods : {
 
             mopened : function() {
-                // trigger map resize after modal shown!
-                google.maps.event.trigger(this.$refs.map.$mapObject, 'resize');
                 // re-centering for resize changes center!
                 if (this.latitude !== null && this.longitude !== null) {
                     this.lat = this.latitude;
                     this.long = this.longitude;
-                    this.azoom = this.zoom;
                 } else if (this.long === null || this.lat === null) {
                     this.lat = parseFloat(this.apilat);
                     this.long = parseFloat(this.apilong);
-                    this.azoom = parseInt(this.apizoom);
                 }
                 this.center = { lat: this.lat, lng : this.long };
+                this.azoom = this.zoom === null ? parseInt(this.apizoom) : this.zoom;
+                this.$refs.map.resizePreserveCenter();
+                if (this.disabled) {
+                    //this.$refs.map.$mapObject.setOptions({ disableDefaultUI : true });
+                    this.$refs.map.$mapObject.setOptions({ 
+                        zoomControl : true,
+                        draggable : false,
+                        scrollwheel : false,
+                        streetViewControl : false
+                    });
+                }
             },
 
             setCenter : function(lat,long) {
@@ -147,19 +159,17 @@
             },
 
             chZoom : function(zoom) {
-                console.log(this.zoom)
                 this.azoom = zoom;
                 this.$emit('zoom_changed',zoom);
-            },
-
-            ok : function() {
-                this.open = false;
-                this.$emit('ok', { lat : this.alat, lng : this.along, zoom : this.azoom });
             },
 
             cancel : function() {
                 this.open = false;
                 this.$emit('cancel');
+            },
+
+            ok : function() {
+                if (this.callbackOk) this.callbackOk();
             },
 
             closed : function() {
@@ -230,8 +240,7 @@
                 }
             }
         }
-
-
+        
          
     }
 

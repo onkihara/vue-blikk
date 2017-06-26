@@ -1,11 +1,13 @@
 // Components
+slideAway = require('./Slideaway.vue')
+taglist = require('./Taglist.vue')
+mapmodal = require('./Mapmodal.vue')
+geocoordinates = require('./Geocoordinates.vue')
 typeahead = require('./Typeahead.vue')
 tagsinput = require('./Tagsinput.vue')
 dropdowninput = require('./Dropdowninput.vue')
 geocoordinatesinput = require('./Geocoordinatesinput.vue')
 qrcodeinput = require('./Qrcodeinput.vue')
-taglist = require('./Taglist.vue')
-slideAway = require('./Slideaway.vue')
 editLine = require('./Editline.vue')
 editArea = require('./Editarea.vue')
 editTypeahead = require('./Edittypeahead.vue')
@@ -14,13 +16,15 @@ editGeocoordinates = require('./EditGeocoordinates.vue')
 editQrcode = require('./EditQrcode.vue')
 
 const VueBlikk = {
+  slideAway,
+  taglist,
+  mapmodal,
+  geocoordinates,
   typeahead,
   tagsinput,
   dropdowninput,
   geocoordinatesinput,
   qrcodeinput,
-  taglist,
-  slideAway,
   editLine,
   editArea,
   editTypeahead,

@@ -1,20 +1,26 @@
 <template>
-    <div class="edit-geo-coordinates">
+    <div class="edit-geo-coordinates" :style="[styleerror, styledone]">
 
-        <div class="geo-edit" v-if="!editor">
+        <div class="geo-edit" v-show="!editor">
 
-          <!--   <slot>
+            <slot>
                 <geo-view 
                     :label-lat="labelLat" 
                     :label-long="labelLong" 
-                    :latitude="formattedLat" 
-                    :longitude="formattedLong"
+                    :formatted-latitude="formattedLat" 
+                    :formatted-longitude="formattedLong"
+                    :latitude="lat"
+                    :longitude="long"
+                    :zoom="azoom"
                     :useviewmap="useviewmap"
+                    :text-map="textMap"
+                    :icon-map="iconMap"
+                    :text-cancel="apicancel"
                 ></geo-view>
-            </slot> -->
+            </slot>
 
-            <a @click="edit" class="">
-                <slot name="editicon"><span class="editicon">[edit]</span></slot>
+            <a @click="edit" class="editicon">
+                <slot name="editicon"><span>[edit]</span></slot>
             </a>
 
         </div>
@@ -66,16 +72,18 @@
 
     import Axios from 'axios';
     import _ from 'lodash';
-   // import Geocoordinates from './Geocoordinates.vue';
+    import Geocoordinates from './Geocoordinates.vue';
     import Geocoordinatesinput from './Geocoordinatesinput.vue';
 
     const NUM = 1;
     const EXP = 8; // Nachkommastellen export default {
+    const COLOR_ERROR = '#dab0c7';
+    const COLOR_DONE = '#b0dac2';
 
     export default {
 
         components : {
-            //'geo-view' : Geocoordinates,
+            'geo-view' : Geocoordinates,
             'geo-input' : Geocoordinatesinput
         },
 
@@ -128,7 +136,13 @@
             // editor
             autoEdit : { type : Boolean, default: true },
             // viewer
-            useviewmap : { type : Boolean, default : false }
+            useviewmap : { type : Boolean, default : false },
+            // request-url, feedbackcolors und callbacks
+            requestUrl : { type : String, default : '' },
+            colorerror : { type : String, default : COLOR_ERROR },
+            colordone : { type : String, default : COLOR_DONE },
+            callbackdone : { type : Function, default : function(message) { console.log(message); }},
+            callbackerror : { type : Function, default : function(error) { console.log(error); }},
         },
 
         data : function() {
@@ -142,7 +156,10 @@
                 oldzoom : this.zoom,
                 formattedLat : null,
                 formattedLong : null,
-                type : this.coordtype
+                type : this.coordtype,
+                styleerror : {},
+                styledone : {},
+                status : ''
             }
         },
 
@@ -160,10 +177,10 @@
             },
 
             enter(coords) {
-                this.lat = coords.lat !== null ? coords.lat.toString() : null;
-                this.long = coords.long !== null ? coords.long.toString() : null;
+                this.lat = this.oldlat = coords.lat !== null ? coords.lat.toString() : null;
+                this.long = this.oldlong = coords.long !== null ? coords.long.toString() : null;
                 this.type = coords.type.toString();
-                this.azoom = coords.zoom.toString();
+                this.azoom = this.oldzoom = coords.zoom.toString();
                 this.leave();
                 this.store();
             },
@@ -192,9 +209,13 @@
                     data[this.nameLong] = this.long;
                     data[this.nameFormatType] = this.type;
                     data[this.nameZoom] = this.azoom;
-                    console.log(data);return;
+                    this.$emit('edit-done',data);
+                    if ( ! this.requestUrl) {
+                        console.log(data);return;
+                    } 
+                    // request
                     var me = this;
-                    Axios.put(this.href, data)
+                    Axios.put(this.requestUrl, data)
                         .then(function (response) {
                             me.styleerror['backgroundColor'] = me.colordone;
                             me.status = 'done';
@@ -214,6 +235,21 @@
                 }
             },
 
+            clearerror : function () {
+                _.delay(function (me) {
+                    me.styleerror['backgroundColor'] = 'transparent';
+                    me.status = '';
+                }, this.fbdelay, this);
+            },
+
+            cleardone : function () {
+                _.delay(function (me) {
+                    me.styledone['backgroundColor'] = 'transparent';
+                    me.status = '';
+                }, this.fbdelay, this);
+            }
+
+
         }
     }
 </script>
@@ -222,7 +258,6 @@
     .edit-geo-coordinates {
 
         .geo-edit {
-            max-width:50%;
             margin:auto;
             position:relative;
             
@@ -230,14 +265,11 @@
                 display:inline-block;
                 font-size:90%;
                 position:absolute;
-                right:-30px;
+                right:0px;
                 top:0px;
                 cursor:pointer;
             }
-
         }
-
- 
     }
 
 

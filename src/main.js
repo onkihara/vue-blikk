@@ -12,6 +12,7 @@ import EdittypeaheadExample from './examples/EdittypeaheadExample.vue'
 import TaglistExample from './examples/TaglistExample.vue'
 import EdittagsinputExample from './examples/EditTagsinputExample.vue'
 */
+
 import GeoExample from './examples/GeoExample.vue'
 
 

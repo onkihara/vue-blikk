@@ -4,10 +4,10 @@
         <div class="left">
 
             <div class="geo-coords">
-                <label>{{ labelLat }}</label>: <span>{{ latitude }}</span>
+                <label>{{ labelLat }}</label>: <span>{{ formattedLatitude }}</span>
             </div>            
             <div class="geo-coords">
-                <label>{{ labelLong }}</label>: <span>{{ longitude }}</span>
+                <label>{{ labelLong }}</label>: <span>{{ formattedLongitude }}</span>
             </div>   
 
         </div>
@@ -19,106 +19,64 @@
             </a>   
         </div>  
 
-       <!--  <modal v-model="apiOpen" ref="apimodal" @opened="mopened" class="apicontainer">
-
-            <span slot="title">{{ apititle }}</span>
-
-            <gmap-map class="mapcontainer" 
-                ref="map" 
-                map-type-id="roadmap" 
-                :center="center" 
-                :zoom="mzoom">
-            </gmap-map>
-
-            <div class="kimme"><span @click="mok" class="korn glyphicon glyphicon-screenshot"></span></div>
-
-            <div slot="modal-footer" class="modal-footer"></div>
-
-        </modal> -->
+        <map-modal 
+            v-model="apiOpen" 
+            ref="mapmodal" 
+            :latitude="lat" 
+            :longitude="long" 
+            :zoom="azoom"
+            :disabled="true"
+            :text-cancel="textCancel"
+            @cancel="apiOpen = false"
+            @ok="apiOpen = false"
+        ></map-modal>
        
-
      </div>
 </template>
 
 <script>
 
-    import Modal from './Modal.vue';
-    import Vue from 'vue';
-    import * as VueGoogleMaps from 'vue2-google-maps';
+    import Mapmodal from './Mapmodal.vue';
 
     const ZOOM = 8;
-    const APILOADER = { load : { key : 'AIzaSyD5LTJK9n2N-ahjfGqwutnt_7fPpXKpR8s'}}; // google-api-key
-
-    if (window != 'undefined' && window.Vue) {
-        window.Vue.use(VueGoogleMaps, APILOADER);
-    } else {
-        Vue.use(VueGoogleMaps, APILOADER);
-    }
-
+    
     export default {
 
         components : {
-             //'modal' : Modal
+             'map-modal' : Mapmodal
         },
 
-        mounted() {
-            
-          },
-
-        watch : {
-
-        },
-
-         props : {
+        props : {
             // coordinates properties
             labelLong : { type : String, default : 'Longitude' },
             labelLat : { type : String, default : 'Latitude' },
-            longitude : { type : String, default : '' },
-            latitude : { type : String, default : '' },
+            formattedLongitude : { type : String, default : null },
+            formattedLatitude : { type : String, default : null }, 
+            longitude : { type : String, default : null },
+            latitude : { type : String, default : null },
+            zoom : { type : String, default : ZOOM.toString() },
             useviewmap : { type : Boolean, default : false },
             textMap : { type : String, default : 'Map'},
             iconMap : { type : String, default : ''},
-            apizoom : { type : String, default : ZOOM.toString() },
+            textCancel : { type : String, default : 'Cancel' }
          },
 
         data : function() {
             return {
                 apiOpen : false,
-                modalHeight : window.innerHeight - 30,
-                mlat : '',
-                mlong : '',
-                mlatvalue : '',
-                mlongvalue : '',
-                center : {},
-                mzoom : parseInt(this.apizoom),
-              
+                lat : null,
+                long : null,
+                azoom : null             
             }
         },
 
         methods : {
-
             openModal : function() {
-                this.apiOpen = true;
-                this.$refs.apimodal.$refs.modaldialog.style.height = this.modalHeight + 'px';
-             },
-
-            mopened : function() {
-                // trigger map resize after modal shown!
-                google.maps.event.trigger(this.$refs.map.$mapObject, 'resize');
-                this.minit();
-            },
-
-            minit : function() {
-                // set center from data or props
-                if (this.long && this.lat) {
-                    this.$nextTick(function() {
-                        // set to actual map-center (no 2-way-binding for this.center)
-                        this.center = { lat : this.round(this.mlat,this.precision), lng : this.round(this.mlong,this.precision) };
-                    });
-                }
-             },
-
-           
+                this.lat = parseFloat(this.latitude);
+                this.long = parseFloat(this.longitude);
+                this.azoom = parseInt(this.zoom);
+                this.apiOpen = true;               
+            }
         }
 
     }
@@ -149,7 +107,7 @@
                 cursor:pointer;
                 width:100%;
                 display:flex;
-                justify-content:flex-end;
+                justify-content:left;
                 align-items:center;
 
                 .btn-map.glyphicon {
