@@ -59,6 +59,7 @@
             @esc="esc"
             @enter="enter"
             @changed="enter"
+            @format_changed="enter"
         >
             <span slot="btn-ok">OK</span>
         </geo-input>   
@@ -103,6 +104,7 @@
 
          props : {
             // coordinates properties
+            daoId : { type : Number, default: null },
             nameLong : { type : String, default : 'long' },
             nameLat : { type : String, default : 'lat' },
             nameFormatType : { type : String, default : 'type' },
@@ -138,7 +140,7 @@
             // viewer
             useviewmap : { type : Boolean, default : false },
             // request-url, feedbackcolors und callbacks
-            requestUrl : { type : String, default : '' },
+            href : { type : String, default : '' },
             colorerror : { type : String, default : COLOR_ERROR },
             colordone : { type : String, default : COLOR_DONE },
             callbackdone : { type : Function, default : function(message) { console.log(message); }},
@@ -157,6 +159,7 @@
                 formattedLat : null,
                 formattedLong : null,
                 type : this.coordtype,
+                oldtype : this.coordtype,
                 styleerror : {},
                 styledone : {},
                 status : ''
@@ -173,16 +176,21 @@
                 this.lat = this.oldlat;
                 this.long = this.oldlong;
                 this.zoom = this.oldzoom;
+                this.type = this.oldtype;
                 this.leave();
             },
 
             enter(coords) {
-                this.lat = this.oldlat = coords.lat !== null ? coords.lat.toString() : null;
-                this.long = this.oldlong = coords.long !== null ? coords.long.toString() : null;
+                this.lat = coords.lat !== null ? coords.lat.toString() : null;
+                this.long = coords.long !== null ? coords.long.toString() : null;
                 this.type = coords.type.toString();
-                this.azoom = this.oldzoom = coords.zoom.toString();
-                this.leave();
+                this.azoom = coords.zoom.toString();
                 this.store();
+                this.oldlat = this.lat;
+                this.oldlong = this.long;
+                this.oldzoom = this.azoom;
+                this.oldtype = this.type;
+                this.leave();
             },
 
             leave() {
@@ -202,20 +210,21 @@
 
             store : function() {
                 // save only changes
-                if (this.lat != this.oldlat || this.long != this.oldlong || this.azoom != this.oldzoom) {
+                if (this.lat != this.oldlat || this.long != this.oldlong || this.azoom != this.oldzoom || this.type != this.oldtype) {
                     // http-request
                     var data = {};
+                    data['id'] = this.daoId;
                     data[this.nameLat] = this.lat;
                     data[this.nameLong] = this.long;
                     data[this.nameFormatType] = this.type;
                     data[this.nameZoom] = this.azoom;
                     this.$emit('edit-done',data);
-                    if ( ! this.requestUrl) {
+                    if (this.href === '') {
                         console.log(data);return;
                     } 
                     // request
                     var me = this;
-                    Axios.put(this.requestUrl, data)
+                    Axios.put(this.href, data)
                         .then(function (response) {
                             me.styleerror['backgroundColor'] = me.colordone;
                             me.status = 'done';

@@ -119,6 +119,7 @@
                 if (old != val) {
                     this.latvalue = this.lats[this.type];
                     this.longvalue = this.longs[this.type];
+                    this.$emit('format_changed',{ lat : this.lat, long : this.long, type : this.type, zoom : this.mzoom });
                 }
             }
 
