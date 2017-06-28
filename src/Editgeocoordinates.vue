@@ -104,7 +104,7 @@
 
          props : {
             // coordinates properties
-            daoId : { type : Number, default: null },
+            daoId : { type : Number, default: 0 },
             nameLong : { type : String, default : 'long' },
             nameLat : { type : String, default : 'lat' },
             nameFormatType : { type : String, default : 'type' },
@@ -213,7 +213,7 @@
                 if (this.lat != this.oldlat || this.long != this.oldlong || this.azoom != this.oldzoom || this.type != this.oldtype) {
                     // http-request
                     var data = {};
-                    data['id'] = this.daoId;
+                    data['id'] = this.daoId !== 0 ? this.daoId : '';
                     data[this.nameLat] = this.lat;
                     data[this.nameLong] = this.long;
                     data[this.nameFormatType] = this.type;
