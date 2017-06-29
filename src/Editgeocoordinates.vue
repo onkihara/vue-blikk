@@ -1,5 +1,5 @@
 <template>
-    <div class="edit-geo-coordinates" :style="[styleerror, styledone]">
+    <div class="edit-geo-coordinates" :class="{ error : fberror, done : fbdone }">
 
         <div class="geo-edit" v-show="!editor">
 
@@ -78,8 +78,7 @@
 
     const NUM = 1;
     const EXP = 8; // Nachkommastellen export default {
-    const COLOR_ERROR = '#dab0c7';
-    const COLOR_DONE = '#b0dac2';
+    const FBDELAY = 1000;
 
     export default {
 
@@ -141,8 +140,7 @@
             useviewmap : { type : Boolean, default : false },
             // request-url, feedbackcolors und callbacks
             href : { type : String, default : '' },
-            colorerror : { type : String, default : COLOR_ERROR },
-            colordone : { type : String, default : COLOR_DONE },
+            fbdelay : { type : Number, default : FBDELAY },
             callbackdone : { type : Function, default : function(message) { console.log(message); }},
             callbackerror : { type : Function, default : function(error) { console.log(error); }},
         },
@@ -160,9 +158,8 @@
                 formattedLong : null,
                 type : this.coordtype,
                 oldtype : this.coordtype,
-                styleerror : {},
-                styledone : {},
-                status : ''
+                fberror : false,
+                fbdone : false
             }
         },
 
@@ -226,35 +223,27 @@
                     var me = this;
                     Axios.put(this.href, data)
                         .then(function (response) {
-                            me.styleerror['backgroundColor'] = me.colordone;
-                            me.status = 'done';
+                            me.fbdone = true;
                             me.cleardone();
-                            // remember new
-                            me.old = me.val;
-                            me.callbackdone(response);
+                            me.callbackdone(response,me);
                         })
                         .catch(function (error) {
-                            me.styleerror['backgroundColor'] = me.colorerror;
-                            me.status = 'error';
+                            me.fberror = true;
                             me.clearerror();
-                            // restore old
-                            me.reset();
-                            me.callbackerror(error);
+                            me.callbackerror(error,me);
                         });
                 }
             },
 
             clearerror : function () {
                 _.delay(function (me) {
-                    me.styleerror['backgroundColor'] = 'transparent';
-                    me.status = '';
+                    me.fberror = false;
                 }, this.fbdelay, this);
             },
 
             cleardone : function () {
                 _.delay(function (me) {
-                    me.styledone['backgroundColor'] = 'transparent';
-                    me.status = '';
+                    me.fbdone = false;
                 }, this.fbdelay, this);
             }
 
@@ -265,6 +254,17 @@
 
 <style lang="scss">
     .edit-geo-coordinates {
+
+        transition: background-color 0.5s;
+        background-color:transparent;
+
+        &.done {
+            background-color: #b0dac2;
+        }
+
+        &.error {
+            background-color: #dab0c7;
+        }
 
         .geo-edit {
             margin:auto;

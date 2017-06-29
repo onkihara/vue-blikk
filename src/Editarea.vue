@@ -1,5 +1,5 @@
 <template>
-    <span :class="status" :style="[styleerror, styledone]" class="edit-area">
+    <span :class="{ error : fberror, done : fbdone }" class="edit-area">
     
         <span ref="text" v-if="!editmode">
             <slot></slot>
@@ -26,8 +26,6 @@
     import _ from 'lodash';
 
     const DELAY = 1000;
-    const COLOR_ERROR = '#dab0c7';
-    const COLOR_DONE = '#b0dac2';
 
     export default {
 
@@ -37,8 +35,6 @@
             delay : { type : Number, default : DELAY },
             value : { type : String },
             br : { type : Boolean, default: false }, // beware line-breaks <br />
-            colorerror : { type : String, default : COLOR_ERROR },
-            colordone : { type : String, default : COLOR_DONE },
             callbackdone : { type : Function, default : function(message) { console.log(message); }},
             callbackerror : { type : Function, default : function(error) { console.log(error); }}
         },
@@ -49,9 +45,8 @@
                 old : '',
                 text : '',
                 editmode : false,
-                styleerror : {},
-                styledone : {},
-                status : '',
+                fberror : false,
+                fbdone : false,
                 height : 0
             }
         },
@@ -103,16 +98,14 @@
                     var me = this;
                     Axios.put(this.href, data)
                         .then(function (response) {
-                            me.styleerror['backgroundColor'] = me.colordone;
-                            me.status = 'done';
+                            me.fbdone = true;
                             me.cleardone();
                             // remember new
                             me.old = me.val;
                             me.callbackdone(response);
                         })
                         .catch(function (error) {
-                            me.styleerror['backgroundColor'] = me.colorerror;
-                            me.status = 'error';
+                            me.fberror = true;
                             me.clearerror();
                             // restore old
                             me.reset();
@@ -129,14 +122,12 @@
             },
             clearerror : function () {
                 _.delay(function (me) {
-                    me.styleerror['backgroundColor'] = 'transparent';
-                    me.status = '';
+                    me.fberror = false;
                 }, this.delay, this);
             },
             cleardone : function () {
                 _.delay(function (me) {
-                    me.styledone['backgroundColor'] = 'transparent';
-                    me.status = '';
+                    me.fbdone = false;
                 }, this.delay, this);
             }
         }
@@ -150,6 +141,14 @@
 
         transition: background-color 0.5s;
         background-color:transparent;
+
+        &.done {
+            background-color: #b0dac2;
+        }
+
+        &.error {
+            background-color: #dab0c7;
+        }
 
         .editicon {
             display:inline-block;
