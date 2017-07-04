@@ -167,7 +167,7 @@
 
             edit() {
                 this.editor = ! this.editor;
-             },
+            },
 
             esc() {
                 this.lat = this.oldlat;

@@ -10,6 +10,7 @@ geocoordinatesinput = require('./Geocoordinatesinput.vue')
 qrcodeinput = require('./Qrcodeinput.vue')
 editLine = require('./Editline.vue')
 editArea = require('./Editarea.vue')
+editDropdown = require('./Editdropdowninput.vue')
 editTypeahead = require('./Edittypeahead.vue')
 editTagsinput = require('./Edittagsinput.vue')
 editGeocoordinates = require('./EditGeocoordinates.vue')
@@ -27,6 +28,7 @@ const VueBlikk = {
   qrcodeinput,
   editLine,
   editArea,
+  editDropdown,
   editTypeahead,
   editTagsinput,
   editGeocoordinates,

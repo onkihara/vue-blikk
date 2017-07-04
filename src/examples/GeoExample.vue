@@ -2,8 +2,6 @@
   <div id="app">
     <h1>{{ msg }}</h1>
 
-	<hr />
-
 	<edit-geo-coordinates 
 		name-long="long" 
 		name-lat="lat" 
@@ -96,6 +94,7 @@
 
 	import EditGeocoordinates from '../Editgeocoordinates.vue'
 	import InputQrcode from '../Qrcodeinput.vue'
+	import Editdropdowninput from '../Editdropdowninput.vue'
  
 	export default {
 
@@ -103,7 +102,8 @@
 
 		components : {
 			'edit-geo-coordinates' : EditGeocoordinates,
-			'input-qr-code' : InputQrcode
+			'input-qr-code' : InputQrcode,
+			'edit-dropdowninput' : Editdropdowninput
 		},
 
 		data () {
@@ -116,6 +116,8 @@
 				type : '2',
 				sourceurl : '',
 				generatorurl : 'debug',
+				//dropdowndata : { one : 'eins', two : 'zwei', three : 'drei' } 
+				dropdowndata : ['eins','zwei','drei'] 
 			}
 		}
 	}

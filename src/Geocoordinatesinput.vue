@@ -11,7 +11,7 @@
                     :placeholder="placeholderLat" 
                     :btn-text="btnText"
                     :disabled="disabled"
-                    @blur="blur('lat',$event)" 
+                    @blur="blurLat" 
                     @esc="esc"
                     @selected="selectedLat"
                     @enter="enterLat"
@@ -26,7 +26,7 @@
                     :placeholder="placeholderLong" 
                     :btn-text="btnText"
                     :disabled="disabled"
-                    @blur="blur('long',$event)" 
+                    @blur="blurLong" 
                     @esc="esc"
                     @selected="selectedLong"
                     @enter="enterLong"
@@ -117,8 +117,8 @@
             // change of dropdownformats
             type(val, old) {
                 if (old != val) {
-                    this.latvalue = this.lats[this.type];
-                    this.longvalue = this.longs[this.type];
+                    this.latvalue = this.type.toString();
+                    this.longvalue = this.type.toString();
                     this.$emit('format_changed',{ lat : this.lat, long : this.long, type : this.type, zoom : this.mzoom });
                 }
             }
@@ -264,7 +264,7 @@
                 }
                 this.lat = lat;
                 this.lats = this.calcCoords(this.lat, 'lat');
-                this.latvalue = this.lats[this.type];
+                this.latvalue = this.type.toString();
             },
 
             recalcLong : function(coord, settype=true) {
@@ -279,7 +279,7 @@
                 }
                 this.long = long;
                 this.longs = this.calcCoords(this.long, 'long');
-                this.longvalue = this.longs[this.type];
+                this.longvalue = this.type.toString();
             },
 
             getFormatted : function(lat, long, type) {
@@ -288,8 +288,8 @@
                 return { lat :  mlats[type], long : mlongs[type] };
             },
 
-            esc : function(data) {
-                this.$emit('esc',data);
+            esc : function(key,value) {
+                this.$emit('esc',value);
                 this.init();
             },
 
@@ -298,13 +298,13 @@
                 this.$refs.input2.esc();
             },
 
-            enterLat : function(data) {
-                this.recalcLat(data);
+            enterLat : function(key, value) {
+                this.recalcLat(value);
                 this.enter();
             },
 
-            enterLong : function(data) {
-                this.recalcLong(data);
+            enterLong : function(key, value) {
+                this.recalcLong(value);
                 this.enter();
             },
 
@@ -314,17 +314,22 @@
                 })
             },
 
-            blur : function(latlong, data) {
-                if ( ! data) return;
-                latlong == 'lat' ? this.recalcLat(data) : this.recalcLong(data);
+            blurLat : function(key, value) {
+                if ( ! value) return;
+                this.recalcLat(value);
             },
 
-            selectedLat : function(data, type) {
-                this.type = type;
+            blurLong : function(key, value) {
+                if ( ! value) return;
+                this.recalcLong(value);
             },
 
-            selectedLong : function(data, type) {
-                this.type = type;
+            selectedLat : function(key, value) {
+                this.type = parseInt(key);
+            },
+
+            selectedLong : function(key, value) {
+                this.type = parseInt(key);
             },
 
             calcCoords : function(coords, latorlong) {
