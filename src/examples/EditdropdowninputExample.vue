@@ -22,7 +22,7 @@
 
 	<hr />
 
-    <edit-dropdowninput name="zahl" value="sieben">
+    <edit-dropdowninput name="zahl" value="sieben" :editable="false">
     	<option value="sieben">Sieben</option>
     	<option value="acht">Acht</option>
     	<option value="neun">Neun</option>

@@ -15,6 +15,7 @@
             :data="data"
             :template="template"
             :disabled="disabled"
+            :editable="editable"
             v-model="key"
             @esc="reset"
             @enter="leave"
@@ -47,12 +48,14 @@
 
         props : {
             // dropdown
+            daoId : { type: Number, default : null},
             btnText : { type: String, default : ''},
             data: {  }, // object or array or string (async-request-url)
             placeholder: {type: String},
             template: {type: String},
             value: {type: String, default: ''},
             disabled : {type: Boolean, default: false },
+            editable : {type: Boolean, default: true },
             // edit-dropdown
             name : { type : String, default : 'name' },
             href : { type : String, default : '' },
@@ -107,6 +110,7 @@
                 if (this.key != this.old) {
                     // http-request
                     var data = {};
+                    data['id'] = this.daoId;
                     data[this.name] = this.key;
                     if ( ! this.href ) {
                         console.log(data);

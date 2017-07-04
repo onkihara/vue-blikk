@@ -8,7 +8,9 @@
 				autocomplete="off" 
 				:name="name" 
 				:placeholder="placeholder"
+				@focus="hasfocus($event)"
 				@blur="blur" 
+				@keydown="keydown"
 				@keydown.esc="esc"
 				@keydown.enter="enter"
 			/>
@@ -84,6 +86,11 @@ export default {
 	},
 
 	methods : {
+		keydown(event) {
+			if ( ! this.editable) {
+				event.preventDefault();
+			}
+		},
 		hit() {
 			this.showDropdown = false;
 			this.key = this.keys[this.current];
@@ -101,6 +108,9 @@ export default {
 		},
 		enter() { this.$emit('enter',this.key, this.val); },
 		focus() { this.$refs.input.focus(); },
+		hasfocus() {
+			if ( ! this.editable) { this.showDropdown = true; }
+		},
 		setItems(items) {
 			items = items || this.data;
 			this.items = [];
