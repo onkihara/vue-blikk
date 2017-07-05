@@ -1,47 +1,41 @@
 <template>
-    <div class="qr-code">
+    <div class="qr-code" :style="qrHeight" ref="qrcode">
         
-        <a ref="qrimage" class="qrfield" :href="source" :title="title" :style="qrStyle"></a>
+        <a ref="qrimage" class="qrfield" :href="href" :title="title" :style="qrStyle" @click="clicked($event)"></a>
         
-        <textarea class="form-control" :placeholder="placeholder" :name="name" v-model="val" :style="{ height: textareaHeight }"></textarea>
-
     </div>
 </template>
 
 <script>
 
-    import Axios from 'axios';
-    import _ from 'lodash';
-
-    const DELAY = 1000;
-
     export default {
 
         mounted : function() {
-            // textareaheight
-            this.textareaHeight = this.matchHeight ? this.$refs.qrimage.offsetHeight + 'px' : null;
+            // calc height
+            if (this.width == 'auto') {
+                this.qrHeight = { height : this.$refs.qrcode.offsetWidth + 'px' };
+            } else {
+                this.qrHeight = { width: this.width, height : this.width };
+            }
             // initial value
             this.val = this.$slots.default ? _.trim(this.$slots.default[0].text) : '';
             // initial render or placeholder
-            this.source = this.qrSource ? this.qrSource : this.qrPlaceholder;      
+            this.src = this.source ? this.source : this.placeholder;      
         },
 
          props : {
-            name : { type : String, default : 'qrcode' },
-            title : { type : String, default : 'Download' },
-            placeholder : { type : String, default : 'QR-Code-Content' },
-            qrSource : { type : String, default : '' },
-            qrGenerator : { type : String, default : '' },
-            qrPlaceholder : { type : String, default : '' },
-            delay : { type : Number, default: DELAY },
-            matchHeight : { type : Boolean, default : true },
+            width : { type : String, default : 'auto' },
+            title : { type : String, default : 'qrcode' },
+            source : { type : String, default : '' },
+            href : { type : String, default : '' },
+            placeholder : { type : String, default : '' },
          },
 
         data : function() {
             return {
                 val : '',
-                textareaHeight : '',
-                source : ''
+                src : '',
+                qrHeight : ''
              }
         },
 
@@ -57,63 +51,38 @@
         computed : {
 
             qrStyle() {
-                return {
-                    backgroundImage : 'url(' + this.source + ')'
-                }
-            }
+                return { backgroundImage : 'url(' + this.src + ')' }
+            },
 
         },
 
         methods : {
+
+            clicked(ev) {
+                this.$emit('click',ev);
+                if (this.href == '') { ev.preventDefault() }
+            }
          
         },
-
-        created() {
-            // create the update-function debounced
-            this.update = _.debounce(function () {
-                // nothing to do
-                if ( ! this.val) return;
-                // get qr-code
-                var vm = this;
-                var data = [];
-                data[this.name] = this.val;
-                // debug-mode
-                if (this.qrGenerator == 'debug') {
-                    console.log(data); return;
-                }
-                axios.post(this.qrGenerator, data)
-                .then(function (response) {
-                    console.log(response.data);
-                }).catch(function (error) {
-                    console.log(error);
-                });
-            }, this.delay);
-        }
 
     }
 </script>
 
 <style lang="scss">
 
+    $size:400px;
+
     .qr-code {
-        width:50%;
-        height:150px;
+        max-width:$size;
+        max-height:$size;
         margin:auto;
 
-        textarea {
-            display:block;
-            width:55%;
-        }
-
-        a {
+        a.qrfield {
             float:left;
             display:block;
-            margin-right:5%;
+            width:100%;
+            height:100%;
             background-color:lightgrey;
-            width:40%;
-            height:0;
-            padding-bottom:40%; /* maintains aspect ration */
-            text-align:center;
             background-align:center;
             background-size:contain;
         }
