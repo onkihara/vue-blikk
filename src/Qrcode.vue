@@ -1,7 +1,7 @@
 <template>
     <div class="qr-code" :style="qrHeight" ref="qrcode">
         
-        <a ref="qrimage" class="qrfield" :href="href" :title="title" :style="qrStyle" @click="clicked($event)"></a>
+        <a ref="qrimage" class="qrfield" :href="download" :title="title" :style="qrStyle" @click="clicked($event)"></a>
         
     </div>
 </template>
@@ -17,8 +17,6 @@
             } else {
                 this.qrHeight = { width: this.width, height : this.width };
             }
-            // initial value
-            this.val = this.$slots.default ? _.trim(this.$slots.default[0].text) : '';
             // initial render or placeholder
             this.src = this.source ? this.source : this.placeholder;      
         },
@@ -27,13 +25,12 @@
             width : { type : String, default : 'auto' },
             title : { type : String, default : 'qrcode' },
             source : { type : String, default : '' },
-            href : { type : String, default : '' },
+            download : { type : String, default : '' },
             placeholder : { type : String, default : '' },
          },
 
         data : function() {
             return {
-                val : '',
                 src : '',
                 qrHeight : ''
              }
@@ -41,9 +38,9 @@
 
         watch : {
 
-            val(val, old) {
+            source(val, old) {
                 if (val === old) return;
-                this.update();
+                this.src = this.source;
             }
 
         },
@@ -60,7 +57,7 @@
 
             clicked(ev) {
                 this.$emit('click',ev);
-                if (this.href == '') { ev.preventDefault() }
+                if (this.download == '') { ev.preventDefault() }
             }
          
         },

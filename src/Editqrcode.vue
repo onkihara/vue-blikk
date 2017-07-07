@@ -1,21 +1,28 @@
 <template>
-    <div class="edit-qrcode" :style="qrSize" ref="eqrsize">
+    <div  :class="{ error : fberror, done : fbdone }" class="edit-qrcode" :style="qrSize" ref="eqrsize">
         
-        <slide-away>
+        <slide-away ref="slideaway">
 
             <div slot="front">
-                <qr-code :width="width" :placeholder="placeholder" :title="title" :source="source" :href="href"></qr-code>
+                <qr-code :width="width" :placeholder="placeholder" :title="title" :source="src" :download="download"></qr-code>
             </div>
 
-            <slot name="editicon"><span slot="right"><span class="editicon">[edit]</span></span></slot>
+           <span slot="right" v-html="editiconRight" @click="edit"></span>
 
             <div slot="back">
-                <h2>Back-Slot</h2>
+                <div class="form-group">
+                    <textarea class="qrcontent form-control" @keyup.esc="esc" @blur="done" v-model="content"></textarea>
+                </div>
             </div>
 
-            <span slot="left">--&gt;</span>
+            <span slot="left" v-html="editiconLeft" @click="done"></span>
 
         </slide-away>
+
+        <div style="display:none;" ref="right"><slot name="edit"></slot></div>
+        <div style="display:none;" ref="left"><slot name="done"></slot></div>
+        <div style="display:none;" ref="content"><slot></slot></div>
+
     </div>
 </template>
 
@@ -42,22 +49,35 @@
             } else {
                 this.qrSize = { width: this.width, height : this.width };
             }
+            // fill editicon-slots
+            this.editiconRight = this.$refs.right.innerHTML || '<span class="editicon">[edit]</span>';
+            this.editiconLeft = this.$refs.left.innerHTML || '<span class="editicon">[done]</span>';
+            this.content = this.oldcontent = this.sanitize(this.$refs.content.textContent);
         },
 
-         props : {
+        props : {
             // qrcode-props
             title : { type : String, default : 'qrcode' },
             source : { type : String, default : '' },
-            href : { type : String, default : '' },
+            download : { type : String, default : '' },
             placeholder : { type : String, default : '' },
             // edit-qrcode-props
             width : { type : String, default : 'auto' },
-
+            name : { type : String, default : 'qrcode' },
+            daoId : { type : String, default : '' },
+            generator : { type : String, default : '' },
          },
 
         data : function() {
             return {
-                qrSize : ''
+                src : '',
+                qrSize : '',
+                editiconRight : '',
+                editiconLeft : '',
+                content : '',
+                oldcontent : '',
+                fberror : false,
+                fbdone : false
             }
         },
 
@@ -66,40 +86,82 @@
         },
 
         computed : {
-
- 
         },
 
         methods : {
+
+            sanitize(text) {
+                return _.trim(text);
+            },
+
+            store : function() {
+                var data = {};
+                data['id'] = this.daoId;
+                data[this.name] = this.content;
+                this.$emit('done',data);
+                // save only changes
+                if (this.content != this.oldcontent) {
+                     Axios.put(this.generator, data)
+                        .then((response) => {
+                            this.fbdone = true;
+                            this.cleardone();
+                            // remember new
+                            this.oldcontent = this.content;
+                            // set new src with uniqid
+                            if (response.src) {
+                                var divider = /\?/.test(response.src) ? '&' : '?';
+                                this.src = response.src + divider + 'uuid=' + _.uniqueId();
+                            }
+                            this.callbackdone(response);
+                        })
+                        .catch((error) => {
+                            this.fberror = true;
+                            this.clearerror();
+                            // restore old
+                            this.reset();
+                            this.callbackerror(error);
+                        });
+                }
+            },
+
+            // events
+
+            edit() {
+                this.$emit('edit',this.content);
+            },
+
+            esc() {
+                this.content = this.oldcontent;
+                this.$refs.slideaway.close();
+            },
+
+            done() {
+                this.$refs.slideaway.close();
+                this.store();
+            },
+
+            // callbacks
+
+            clearerror : function () {
+                _.delay(function (me) {
+                    me.fberror = false;
+                }, this.fbdelay, this);
+            },
+
+            cleardone : function () {
+                _.delay(function (me) {
+                    me.fbdone = false;
+                }, this.fbdelay, this);
+            }
          
         },
-
-        created() {
-            // create the update-function debounced
-            // this.update = _.debounce(function () {
-            //     // nothing to do
-            //     if ( ! this.val) return;
-            //     // get qr-code
-            //     var vm = this;
-            //     var data = [];
-            //     data[this.name] = this.val;
-            //     // debug-mode
-            //     if (this.qrGenerator == 'debug') {
-            //         console.log(data); return;
-            //     }
-            //     axios.post(this.qrGenerator, data)
-            //     .then(function (response) {
-            //         console.log(response.data);
-            //     }).catch(function (error) {
-            //         console.log(error);
-            //     });
-            // }, this.delay);
-        }
 
     }
 </script>
 
 <style lang="scss">
+
+    $size:400px;
 
     .edit-qrcode {
 
@@ -123,6 +185,17 @@
 
         a {
             cursor:pointer;
+        }
+
+        .back > div, .back > div > div, .qrcontent {
+            height:100%;
+        }
+
+        .qrcontent {
+            max-width:$size;
+            max-height:$size;
+            margin:auto;
+            padding-top:45px;
         }
     }
 

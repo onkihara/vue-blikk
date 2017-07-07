@@ -3,12 +3,12 @@
 
         <div :class="{ away : isAway }" class="front">
             <slot name="front"></slot>
-            <a class="slide" v-on:click.prevent="isAway = !isAway" href=""><slot name="right">O</slot></a>
+            <a class="slide" v-on:click.prevent="open" href=""><slot name="right">O</slot></a>
         </div>
 
         <div class="back">
             <slot name="back"></slot>
-            <a class="slide" v-on:click.prevent="isAway = !isAway" href=""><slot name="left">X</slot></a>
+            <a class="slide" v-on:click.prevent="close" href=""><slot name="left">X</slot></a>
         </div>
 
     </div>
@@ -25,7 +25,17 @@
             return {
                 isAway : false
             }
+        },
+
+        methods : {
+            open() {
+                this.isAway = true;
+            },
+            close() {
+                this.isAway = false;
+            }
         }
+
     }
 </script>
 

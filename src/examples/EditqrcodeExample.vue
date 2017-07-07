@@ -7,8 +7,15 @@
     <edit-qrcode
 		width="300px"
 		placeholder="../dist/logo.png"
-		href="//blikk.it"
-    ></edit-qrcode>
+		generator=""
+		name="code"
+		source=""
+		download=""
+    >
+    	<span  slot="edit" class="glyphicon glyphicon-pencil"></span>
+    	<span  slot="done" class="glyphicon glyphicon-ok"></span>
+    	{{ content }}
+    </edit-qrcode>
 
     <hr />
 
@@ -16,9 +23,8 @@
 		width="200px"
 		placeholder=""
 		source="../dist/logo.png"
-		href=""
+		download=""
     >
-    	<span slot="editicon"><span class="glyphicon glyphicon-edit"></span></span>
     </qr-code>
 
  	
@@ -42,7 +48,7 @@
 		data () {
 			return {
 				msg: 'QR-Code-Test',
-				
+				content : "Länge: 34,345445345\nBreite: 11,2454354"
 			}
 		}
 	}

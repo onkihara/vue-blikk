@@ -7,7 +7,7 @@ typeahead = require('./Typeahead.vue')
 tagsinput = require('./Tagsinput.vue')
 dropdowninput = require('./Dropdowninput.vue')
 geocoordinatesinput = require('./Geocoordinatesinput.vue')
-qrcodeinput = require('./Qrcodeinput.vue')
+qrcode = require('./Qrcode.vue')
 editLine = require('./Editline.vue')
 editArea = require('./Editarea.vue')
 editDropdown = require('./Editdropdowninput.vue')
@@ -25,7 +25,7 @@ const VueBlikk = {
   tagsinput,
   dropdowninput,
   geocoordinatesinput,
-  qrcodeinput,
+  qrcode,
   editLine,
   editArea,
   editDropdown,
