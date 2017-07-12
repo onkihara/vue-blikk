@@ -215,6 +215,9 @@
                     data[this.nameLong] = this.long;
                     data[this.nameFormatType] = this.type;
                     data[this.nameZoom] = this.azoom;
+                    this.setFormattedCoords();
+                    data['f' + this.nameLat] = this.formattedLat;
+                    data['f' + this.nameLong] = this.formattedLong;
                     this.$emit('edit-done',data);
                     if (this.href === '') {
                         console.log(data);return;

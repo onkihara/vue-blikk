@@ -11,11 +11,11 @@
 
             <div slot="back">
                 <div class="form-group">
-                    <textarea class="qrcontent form-control" @keyup.esc="esc" @blur="done" v-model="content"></textarea>
+                    <textarea ref="input" class="qrcontent form-control" @keyup.esc="esc" @blur="blur" v-model="content"></textarea>
                 </div>
             </div>
 
-            <span slot="left" v-html="editiconLeft" @click="done"></span>
+            <span slot="left" v-html="editiconLeft" @click.prevent="done"></span>
 
         </slide-away>
 
@@ -66,18 +66,21 @@
             name : { type : String, default : 'qrcode' },
             daoId : { type : String, default : '' },
             generator : { type : String, default : '' },
+            onBlur : { type : Boolean, default: false },
+            callbackdone : { type : Function, default : function(message) { console.log(message); }},
+            callbackerror : { type : Function, default : function(error) { console.log(error); }},
          },
 
         data : function() {
             return {
-                src : '',
+                src : this.source,
                 qrSize : '',
                 editiconRight : '',
                 editiconLeft : '',
                 content : '',
                 oldcontent : '',
                 fberror : false,
-                fbdone : false
+                fbdone : false,
             }
         },
 
@@ -101,16 +104,15 @@
                 this.$emit('done',data);
                 // save only changes
                 if (this.content != this.oldcontent) {
-                     Axios.put(this.generator, data)
+                    Axios.put(this.generator, data)
                         .then((response) => {
                             this.fbdone = true;
                             this.cleardone();
                             // remember new
                             this.oldcontent = this.content;
                             // set new src with uniqid
-                            if (response.src) {
-                                var divider = /\?/.test(response.src) ? '&' : '?';
-                                this.src = response.src + divider + 'uuid=' + _.uniqueId();
+                            if (response.data.src) {
+                                this.setSource(response.data.src);
                             }
                             this.callbackdone(response);
                         })
@@ -118,15 +120,27 @@
                             this.fberror = true;
                             this.clearerror();
                             // restore old
-                            this.reset();
+                            this.esc();
                             this.callbackerror(error);
                         });
-                }
+                } 
+            },
+
+            setSource(src) {
+                src = src || this.src;
+                var divider = /\?/.test(src) ? '&' : '?';
+                this.src = src + divider + 'uuid=' + _.uniqueId();
+            },
+
+            refresh(content, source) {
+                this.content = this.oldcontent = content;
+                this.setSource(source);
             },
 
             // events
 
             edit() {
+                this.$refs.input.focus();
                 this.$emit('edit',this.content);
             },
 
@@ -137,7 +151,13 @@
 
             done() {
                 this.$refs.slideaway.close();
-                this.store();
+                this.store();                    
+            },
+
+            blur() {
+                if (this.onBlur) {
+                    this.done();
+                }
             },
 
             // callbacks

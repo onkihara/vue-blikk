@@ -11,6 +11,7 @@
 		name="code"
 		source=""
 		download=""
+		:on-blur="true"
     >
     	<span  slot="edit" class="glyphicon glyphicon-pencil"></span>
     	<span  slot="done" class="glyphicon glyphicon-ok"></span>
