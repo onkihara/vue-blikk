@@ -1,5 +1,12 @@
 <template>
-    <div  :class="{ error : fberror, done : fbdone }" class="edit-qrcode" :style="qrSize" ref="eqrsize">
+    <div  
+        :class="{ error : fberror, done : fbdone }" 
+        class="edit-qrcode" 
+        :style="qrSize" 
+        ref="eqrsize" 
+        @mouseenter="showEditicon(true)"
+        @mouseleave="showEditicon(false)"
+    >
         
         <slide-away ref="slideaway">
 
@@ -7,7 +14,7 @@
                 <qr-code :width="width" :placeholder="placeholder" :title="title" :source="src" :download="download"></qr-code>
             </div>
 
-           <span slot="right" v-html="editiconRight" @click="edit"></span>
+           <span slot="right" v-html="editiconRight" @click="edit" v-show="isOver"></span>
 
             <div slot="back">
                 <div class="form-group">
@@ -69,6 +76,7 @@
             onBlur : { type : Boolean, default: false },
             callbackdone : { type : Function, default : function(message) { console.log(message); }},
             callbackerror : { type : Function, default : function(error) { console.log(error); }},
+            onHover : { type : Boolean, default: true },
          },
 
         data : function() {
@@ -81,6 +89,7 @@
                 oldcontent : '',
                 fberror : false,
                 fbdone : false,
+                isOver : ! this.onHover,
             }
         },
 
@@ -150,6 +159,7 @@
             },
 
             done() {
+                if (this.generator == '') this.esc();
                 this.$refs.slideaway.close();
                 this.store();                    
             },
@@ -172,8 +182,13 @@
                 _.delay(function (me) {
                     me.fbdone = false;
                 }, this.fbdelay, this);
-            }
+            },
          
+            showEditicon(onoff) {
+                if ( ! this.onHover ) return;
+                this.isOver = onoff;
+            }
+
         },
 
     }

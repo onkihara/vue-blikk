@@ -58,10 +58,7 @@
 
 	<!-- <hr style="clear:both" />
 
-	<input-qr-code :qr-source="sourceurl" :qr-generator="generatorurl" qr-placeholder="/dist/logo.png">
 		
-	</input-qr-code>
-	
 	<hr style="clear:both" />
 
 	<input-geo-coordinates 
@@ -93,7 +90,6 @@
 <script>
 
 	import EditGeocoordinates from '../Editgeocoordinates.vue'
-	import InputQrcode from '../Qrcodeinput.vue'
 	import Editdropdowninput from '../Editdropdowninput.vue'
  
 	export default {
@@ -102,7 +98,6 @@
 
 		components : {
 			'edit-geo-coordinates' : EditGeocoordinates,
-			'input-qr-code' : InputQrcode,
 			'edit-dropdowninput' : Editdropdowninput
 		},
 

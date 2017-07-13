@@ -1,9 +1,9 @@
 <template>
-    <span :class="{ error : fberror, done : fbdone }" class="edit-tagsinput" v-click-outside="leave">
+    <span :class="{ error : fberror, done : fbdone }" class="edit-tagsinput" v-click-outside="leave" @mouseenter="showEditicon(true)" @mouseleave="showEditicon(false)">
     
         <taglist v-if="!editmode" ref="taglist" :separator="separator" :quote="quote"><slot></slot></taglist>
 
-        <a v-if="!editmode" @click.stop="edit" class="">
+        <a v-if="!editmode" @click.stop="edit" class="" v-show="isOver">
             <slot name="editicon"><span class="editicon">[edit]</span></slot>
         </a>
 
@@ -55,11 +55,13 @@
         },
 
         props : {
+            daoId : { type : String, default : '' },
             name : { type : String, default : 'name' },
             href : { type : String, default : '' },
             fbdelay : { type : Number, default : FBDELAY },
             callbackdone : { type : Function, default : function(message) { console.log(message); }},
             callbackerror : { type : Function, default : function(error) { console.log(error); }},
+            onHover : { type : Boolean, default: true },
             // taglist-props
             separator: {type: String, default: ','},
             quote: {type: Boolean, default: false},
@@ -82,7 +84,7 @@
             template: {type: String},
             limit : { type : Number, default : LIMIT},
             matchCase : { type : Boolean, default : false },
-            matchStart : { type : Boolean, default : false }
+            matchStart : { type : Boolean, default : false },
          },
 
         data : function() {
@@ -93,7 +95,8 @@
                 text : '',
                 editmode : false,
                 fberror : false,
-                fbdone : false
+                fbdone : false,
+                isOver : ! this.onHover,
             }
         },
 
@@ -136,6 +139,7 @@
                 if (this.val != this.old) {
                     // http-request
                     var data = {};
+                    data.id = this.daoId;
                     data[this.name] = this.val;
                     var me = this;
                     Axios.put(this.href, data)
@@ -184,6 +188,10 @@
                 _.delay(function (me) {
                     me.fbdone = false;
                 }, this.fbdelay, this);
+            },
+            showEditicon(onoff) {
+                if ( ! this.onHover ) return;
+                this.isOver = onoff;
             }
         }
 

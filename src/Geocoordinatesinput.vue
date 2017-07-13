@@ -308,6 +308,11 @@
                 this.enter();
             },
 
+            enterAll : function() {
+                this.$refs.input1.enter();
+                this.$refs.input2.enter();
+            },
+
             enter : function() {
                 this.$nextTick(() => {
                     this.$emit('enter',{ lat : this.lat, long : this.long, type : this.type, zoom : this.mzoom });

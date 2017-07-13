@@ -1,5 +1,5 @@
 <template>
-    <div class="edit-geo-coordinates" :class="{ error : fberror, done : fbdone }">
+    <div class="edit-geo-coordinates" :class="{ error : fberror, done : fbdone }" @mouseenter="showEditicon(true)" @mouseleave="showEditicon(false)" v-click-outside="clickedOutside">
 
         <div class="geo-edit" v-show="!editor">
 
@@ -19,7 +19,7 @@
                 ></geo-view>
             </slot>
 
-            <a @click="edit" class="editicon">
+            <a @click="edit" class="editicon" v-show="isOver">
                 <slot name="editicon"><span>[edit]</span></slot>
             </a>
 
@@ -75,12 +75,18 @@
     import _ from 'lodash';
     import Geocoordinates from './Geocoordinates.vue';
     import Geocoordinatesinput from './Geocoordinatesinput.vue';
+    import ClickOutside from './directives/ClickOutside.js';
+
 
     const NUM = 1;
     const EXP = 8; // Nachkommastellen export default {
     const FBDELAY = 1000;
 
     export default {
+
+        directives: {
+            ClickOutside
+        },
 
         components : {
             'geo-view' : Geocoordinates,
@@ -143,6 +149,7 @@
             fbdelay : { type : Number, default : FBDELAY },
             callbackdone : { type : Function, default : function(message) { console.log(message); }},
             callbackerror : { type : Function, default : function(error) { console.log(error); }},
+            onHover : { type : Boolean, default: true },
         },
 
         data : function() {
@@ -159,7 +166,8 @@
                 type : this.coordtype,
                 oldtype : this.coordtype,
                 fberror : false,
-                fbdone : false
+                fbdone : false,
+                isOver : ! this.onHover,
             }
         },
 
@@ -193,6 +201,10 @@
             leave() {
                 this.setFormattedCoords();
                 this.editor = false;
+            },
+
+            clickedOutside() {
+                this.$refs.geoinput.enterAll();
             },
 
             setFormattedCoords() {
@@ -248,9 +260,11 @@
                 _.delay(function (me) {
                     me.fbdone = false;
                 }, this.fbdelay, this);
+            },
+            showEditicon(onoff) {
+                if ( ! this.onHover ) return;
+                this.isOver = onoff;
             }
-
-
         }
     }
 </script>

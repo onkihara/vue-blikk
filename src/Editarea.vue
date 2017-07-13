@@ -1,17 +1,18 @@
 <template>
-    <span :class="{ error : fberror, done : fbdone }" class="edit-area">
+    <span :class="{ error : fberror, done : fbdone }" class="edit-area" @mouseenter="showEditicon(true)" @mouseleave="showEditicon(false)">
     
         <span ref="text" v-if="!editmode">
             <slot></slot>
         </span>
 
-        <a v-if="!editmode" @click="edit" class="">
+        <a v-if="!editmode" @click.stop.prevent="edit" class="" v-show="isOver">
             <slot name="editicon"><span class="editicon">[edit]</span></slot>
         </a>
 
         <textarea 
             ref="input" 
             v-if="editmode" 
+            :placeholder="placeholder"
             @blur="leave" 
             @keydown.esc.stop="reset"
             v-model="val" 
@@ -30,13 +31,16 @@
     export default {
 
         props : {
+            daoId : { type : Number, default : null },
             name : { type : String, default : 'name' },
             href : { type : String, default : '' },
             delay : { type : Number, default : DELAY },
             value : { type : String },
+            placeholder : { type : String, default : '' },
             br : { type : Boolean, default: false }, // beware line-breaks <br />
             callbackdone : { type : Function, default : function(message) { console.log(message); }},
-            callbackerror : { type : Function, default : function(error) { console.log(error); }}
+            callbackerror : { type : Function, default : function(error) { console.log(error); }},
+            onHover : { type : Boolean, default: true },
         },
 
         data : function() {
@@ -47,7 +51,8 @@
                 editmode : false,
                 fberror : false,
                 fbdone : false,
-                height : 0
+                height : 0,
+                isOver : ! this.onHover,
             }
         },
 
@@ -55,14 +60,21 @@
             if (this.br) {
                 this.val = this.old = this.$refs.text.innerHTML.trim()
                     .replace(/<br\s?\/?>(\n\r|\r\n|\r|\n)?/g,'\n');
+                this.$refs.text.innerHTML = this.val.replace(/\n/g,'<br>');
             } else {
                 this.val = this.old = this.$refs.text.textContent.trim();
             }
             // adjust height
             this.height = this.$refs.text.offsetHeight;
+            this.setPlaceholder();
         },
 
         methods : {
+           setPlaceholder : function() {
+                if (this.val == '' && this.placeholder != '') {
+                    this.$refs.text.innerHTML = '<span class="placeholder">'+this.placeholder+'</span>';
+                }
+            },
             edit : function() {
                 this.editmode = true;
                 this.$nextTick(function() {
@@ -80,6 +92,7 @@
                     this.setText(this.val);
                     // store
                     this.store();
+                    this.setPlaceholder();
                 });
             },
             reset : function() {
@@ -87,6 +100,7 @@
                 this.val = this.old;
                 this.$nextTick(function() {
                     this.setText(this.old);
+                    this.setPlaceholder();
                 });
             },
             store : function() {
@@ -94,6 +108,7 @@
                 if (this.val != this.old) {
                     // http-request
                     var data = {};
+                    data.id = this.daoId;
                     data[this.name] = this.br ? this.val.replace(/<br\s?\/?>/g,'\n') : this.val;
                     var me = this;
                     Axios.put(this.href, data)
@@ -129,6 +144,10 @@
                 _.delay(function (me) {
                     me.fbdone = false;
                 }, this.delay, this);
+            },
+            showEditicon(onoff) {
+                if ( ! this.onHover ) return;
+                this.isOver = onoff;
             }
         }
 
@@ -166,6 +185,10 @@
             height:100%;
             font-family:inherit;
             font-size:100%;
+        }
+
+        .placeholder {
+            color:lightgrey;
         }
 
     }

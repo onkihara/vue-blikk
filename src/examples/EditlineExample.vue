@@ -2,7 +2,20 @@
   <div id="app">
     <h1>{{ msg }}</h1>
 
-	<h1><edit-line name="title" href="http://localhost:8080" colorerror="red">Line to Edit ...</edit-line></h1>
+	<h2><edit-line 
+		name="title" 
+		href="http://localhost:8080/request.html" 
+		colorerror="red"
+		placeholder="Zeile zum ändern ..."
+	></edit-line></h2>
+
+	<h2><edit-area 
+		name="info" 
+		placeholder="Weitere Informationen ..." 
+		:br="true" 
+		href="http://localhost:8080/request.html"
+	>	</edit-area></h2>
+
 
   </div>
 </template>
@@ -10,13 +23,15 @@
 <script>
 
 	import Editline from '../Editline.vue'
+	import Editarea from '../Editarea.vue'
 
 	export default {
 
 		name: 'app',
 
 		components : {
-			'edit-line' : Editline
+			'edit-line' : Editline,
+			'edit-area' : Editarea
 		},
 
 		data () {

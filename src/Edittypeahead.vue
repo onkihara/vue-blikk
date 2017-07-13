@@ -1,11 +1,11 @@
 <template>
-    <span :class="{ error : fberror, done : fbdone }" class="edit-typeahead">
+    <span :class="{ error : fberror, done : fbdone }" class="edit-typeahead" @mouseenter="showEditicon(true)" @mouseleave="showEditicon(false)">
     
         <span ref="text" v-if="!editmode">
             <slot></slot>
         </span>
 
-        <a v-if="!editmode" @click="edit" class="">
+        <a v-if="!editmode" @click="edit" class="" v-show="isOver">
             <slot name="editicon"><span class="editicon">[edit]</span></slot>
         </a>
 
@@ -47,11 +47,13 @@
         },
 
         props : {
+            daoId : { type : String, default : '' },
             name : { type : String, default : 'name' },
             href : { type : String, default : '' },
             fbdelay : { type : Number, default : FBDELAY },
             callbackdone : { type : Function, default : function(message) { console.log(message); }},
             callbackerror : { type : Function, default : function(error) { console.log(error); }},
+            onHover : { type : Boolean, default: true },            
             // typeahead-props
             async: {type: String},
             data: {type: Array},
@@ -76,7 +78,8 @@
                 text : '',
                 editmode : false,
                 fberror : false,
-                fbdone : false
+                fbdone : false,
+                isOver : ! this.onHover,
             }
         },
 
@@ -118,6 +121,7 @@
                 if (this.val != this.old) {
                     // http-request
                     var data = {};
+                    data.id = this.daoId;
                     data[this.name] = this.br ? this.val.replace(/<br\s?\/?>/g,'\n') : this.val;
                     var me = this;
                     Axios.put(this.href, data)
@@ -153,6 +157,10 @@
                 _.delay(function (me) {
                     me.fbdone = false;
                 }, this.fbdelay, this);
+            },
+            showEditicon(onoff) {
+                if ( ! this.onHover ) return;
+                this.isOver = onoff;
             }
         }
 

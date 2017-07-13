@@ -1,11 +1,11 @@
 <template>
-    <span :class="{ error : fberror, done : fbdone }" class="edit-line">
+    <span :class="{ error : fberror, done : fbdone }" class="edit-line" @mouseenter="showEditicon(true)" @mouseleave="showEditicon(false)">
     
         <span ref="text" v-if="!editmode">
             <slot></slot>
         </span>
 
-        <a v-if="!editmode" @click="edit" class="">
+        <a v-if="!editmode" @click.stop.prevent="edit" class="" v-show="isOver">
             <slot name="editicon"><span class="editicon">[edit]</span></slot>
         </a>
 
@@ -13,6 +13,7 @@
             ref="input" 
             v-if="editmode" 
             type="text" 
+            :placeholder="placeholder"
             @blur="leave" 
             @keydown.enter.stop="leave"
             @keydown.esc.stop="reset"
@@ -32,11 +33,14 @@
     export default {
 
         props : {
+            daoId : { type : Number, default : null },
             name : { type : String, default : 'name' },
             href : { type : String, default : '' },
+            placeholder : { type : String, default : '' },
             delay : { type : Number, default : DELAY },
             callbackdone : { type : Function, default : function(message) { console.log(message); }},
-            callbackerror : { type : Function, default : function(error) { console.log(error); }}
+            callbackerror : { type : Function, default : function(error) { console.log(error); }},
+            onHover : { type : Boolean, default: true },
         },
 
         data : function() {
@@ -46,15 +50,22 @@
                 text : '',
                 editmode : false,
                 fberror : false,
-                fbdone : false
+                fbdone : false,
+                isOver : ! this.onHover,
             }
         },
 
         mounted : function() {
             this.val = this.old = this.$refs.text.textContent.trim();
+            this.setPlaceholder();
         },
 
         methods : {
+            setPlaceholder : function() {
+                if (this.val == '' && this.placeholder != '') {
+                    this.$refs.text.innerHTML = '<span class="placeholder">'+this.placeholder+'</span>';
+                }
+            },
             edit : function() {
                 this.editmode = true;
                 this.$nextTick(function() {
@@ -71,6 +82,7 @@
                    this.$refs.text.textContent = this.val;
                    // store
                    this.store();
+                   this.setPlaceholder();
                 });
             },
             reset : function() {
@@ -78,6 +90,7 @@
                 this.val = this.old;
                 this.$nextTick(function() {
                    this.$refs.text.textContent = this.old;
+                   this.setPlaceholder();
                 });
             },
             store : function() {
@@ -85,6 +98,7 @@
                 if (this.val != this.old) {
                     // http-request
                     var data = {};
+                    data.id = this.daoId;
                     data[this.name] = this.val;
                     var me = this;
                     Axios.put(this.href, data)
@@ -113,6 +127,10 @@
                 _.delay(function (me) {
                     me.fbdone = false;
                 }, this.delay, this);
+            },
+            showEditicon(onoff) {
+                if ( ! this.onHover ) return;
+                this.isOver = onoff;
             }
         }
 
@@ -149,6 +167,10 @@
             width:100%;
             height:100%;
             font-size:100%;
+        }
+
+        .placeholder {
+            color:lightgrey;
         }
 
     }
