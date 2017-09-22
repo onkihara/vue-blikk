@@ -5,6 +5,7 @@ mapmodal = require('./Mapmodal.vue')
 geocoordinates = require('./Geocoordinates.vue')
 typeahead = require('./Typeahead.vue')
 tagsinput = require('./Tagsinput.vue')
+tagsdropdown = require('./TagsDropdown.vue')
 dropdowninput = require('./Dropdowninput.vue')
 geocoordinatesinput = require('./Geocoordinatesinput.vue')
 qrcode = require('./Qrcode.vue')
@@ -23,6 +24,7 @@ const VueBlikk = {
   geocoordinates,
   typeahead,
   tagsinput,
+  tagsdropdown,
   dropdowninput,
   geocoordinatesinput,
   qrcode,
