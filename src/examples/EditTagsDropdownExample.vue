@@ -7,7 +7,7 @@
 	<h2>TagsDropdown</h2>
 
 	<h3>Mit Options</h3>
-	<tags-dropdown placeholder="Auswahl">
+	<tags-dropdown text="Auswahl">
 		<option value="1">eins</option>
 		<option value="2" selected>zwei</option>
 		<option value="3">drei</option>
@@ -16,10 +16,17 @@
 	</tags-dropdown>
 
 	<h3>Mit Data-Attribute</h3>
-	<tags-dropdown placeholder="mit Data" :data="data"></tags-dropdown>
+	<tags-dropdown text="mit Data" :data="data"></tags-dropdown>
 
 	<h3>Mit Async-Http-Request</h3>
-	<tags-dropdown placeholder="Async" async="requests/tagsdropdown_data.json" async-key="key"></tags-dropdown>
+	<tags-dropdown text="Async" async="requests/tagsdropdown_data.json" async-key="key"></tags-dropdown>
+
+	<h3>Dropdown</h3>
+	<drop-down :grouped="true" text="Dropdown" type="primary">
+		<li><a href="test1">eins</a></li>
+		<li><a href="test2">zwei</a></li>
+	</drop-down>
+	<drop-down :grouped="true" text="With Data" :data="dropdownData"></drop-down>
 
   </div>
 </template>
@@ -27,13 +34,15 @@
 <script>
 
 	import TagsDropdown from '../TagsDropdown.vue'
+	import Dropdown from '../Dropdown.vue'
 
 	export default {
 
 		name: 'app',
 
 		components : {
-			'tags-dropdown' : TagsDropdown
+			'tags-dropdown' : TagsDropdown,
+			'drop-down' : Dropdown
 		},
 
 		data () {
@@ -44,6 +53,12 @@
 					{ value : 2, text : 'zwei', selected : false },
 					{ value : 3, text : 'drei', selected : false },
 					{ value : 4, text : 'vier', selected : false },
+				],
+				dropdownData : [
+					{ href : 1, text : 'eins', prevent : true },
+					{ href : 2, text : 'zwei', prevent : true },
+					{ href : 3, text : 'drei', prevent : true },
+					{ href : 4, text : 'vier', prevent : true },
 				]
 			}
 		}
@@ -59,8 +74,7 @@
 
 
 	.tagsdropdown {
-		width:50%;
-		margin:auto;
+		display: inline-block;
 	}
 
 	#app {

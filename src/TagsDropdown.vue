@@ -3,17 +3,7 @@
 		<span v-for="(tag, i) in tags" class="tag label label-info">
 			<component :is="tagscomponent" :tag="tag.text" @remove="removeTag(tag.value)"></component>
 		</span>
-		<div v-if="hasOptions" :class="[ type, { open : open }]">
-			<button class="btn btn-default dropdown-toggle" type="button" :id="tmpid" @click=" open = !open" aria-haspopup="true" :aria-expanded="open ? 'true' : 'false'">
-				{{ placeholder }}
-				<span class="caret"></span>
-			</button>
-			<ul class="dropdown-menu" :aria-labelledby="tmpid">
-				<li v-for="option in selectableOptions">
-						<a href="#" @click.prevent="hit(option.value)">{{ option.text }}</a>
-				</li>
-			</ul>
-		</div>
+		<drop-down v-if="hasOptions" :data="menu" :text="text" @hit="hit"></drop-down>
 	</div>
 </template>
 
@@ -21,10 +11,13 @@
 
 	import _ from 'lodash';
 	import axios from 'axios';
-
-	const DELAY = 300;
+	import Dropdown from './Dropdown.vue';
 
 	export default {
+
+		components : {
+             'drop-down' : Dropdown
+        },
 
 		mounted : function() {
 			// preset options and tags
@@ -38,6 +31,7 @@
         			option['selected'] = vn.data.attrs.selected !== undefined ? true : false;
         			return option;
 	        	});
+            	this.setTags();
             } else if (this.async) {
 				var vm = this;
 				axios.get(this.async)
@@ -50,9 +44,9 @@
 					});
 			} else if (this.data) {
 				this.setOptions(this.data);
+            	this.setTags();
 			}
             //console.log(this.options);
-            this.setTags();
             //console.log(this.tags);
          },
 
@@ -60,8 +54,8 @@
 			id: { type : String },
 			name : { type : String },
 			type : { type: String, default: 'dropdown' }, // dropdown or dropup
-			data : { type : Array, default : null }, // { value: 1, text: 'eins', selected:true ...}
-			placeholder : {type: String, default : '' }, // button-caption
+			data : { type : Array, default : null }, // [ {value: 1, text: 'eins', selected:true}, {...} ]
+			text : {type: String, default : '' }, // button-caption
 			async : { type : String } // async-url für json-data
 		},
 
@@ -69,7 +63,7 @@
 			return {
 				options : [],
 				tags : [],
-				open : false,
+				menu : [],
 			}
 		},
 
@@ -86,24 +80,25 @@
 			tmpid : function() {
 				return _.uniqueId('tagsdropdown_');
 			},
-			selectableOptions : function() {
-				return this.options.filter(option => option.selected == false);
-			},
 			hasOptions : function() {
-				return this.selectableOptions.length > 0;
+				return this.menu.length > 0;
 			}
 		},
 
 		methods : {
-			getDelay : function() {
-				return this.delay;
+			hit : function(item,event) {
+				this.addTag(item.href);
 			},
-			hit : function(optionvalue) {
-				this.addTag(optionvalue);
-				this.open = ! this.open;
+			setMenu : function() {
+				this.menu = this.options.filter(option => option.selected == false)
+					.map(option => {
+						return { href : option.value, text : option.text, prevent : true };
+					});
+				//console.log(this.menu);
 			},
 			setTags : function() {
 				this.tags = this.options.filter(option => option.selected == true );
+				this.setMenu();
 			},
 			addTag : function(tagvalue) {
 				this.options = this.options.map(option => {

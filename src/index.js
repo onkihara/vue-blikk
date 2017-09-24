@@ -1,6 +1,7 @@
 // Components
 slideAway = require('./Slideaway.vue')
 taglist = require('./Taglist.vue')
+dropdown = require('./Dropdown.vue')
 mapmodal = require('./Mapmodal.vue')
 geocoordinates = require('./Geocoordinates.vue')
 typeahead = require('./Typeahead.vue')
@@ -20,6 +21,7 @@ editQrcode = require('./EditQrcode.vue')
 const VueBlikk = {
   slideAway,
   taglist,
+  dropdown,
   mapmodal,
   geocoordinates,
   typeahead,
