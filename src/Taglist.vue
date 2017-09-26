@@ -11,11 +11,16 @@ export default {
 	props: {
 		separator: {type: String, default: ','},
 		quote: {type: Boolean, default: false},
+		data: { type: Array} // tags as array
 	},
 
 	mounted() {
-		this.val = this.$slots.default[0].text;
-		this.setTags();
+		if (this.data) {
+			this.tags = this.data;
+		} else {
+			this.val = this.$slots.default[0].text;
+			this.setTags();
+		}
 	},
 
 	data() {
@@ -29,6 +34,11 @@ export default {
 		val(act, old) {
 			if (act !== old) {
 				this.setTags();
+			}
+		},
+		data(act, old) {
+			if (act !== old) {
+				this.tags = this.data;
 			}
 		}
 	},

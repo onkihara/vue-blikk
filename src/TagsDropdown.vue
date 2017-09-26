@@ -1,9 +1,14 @@
 <template>
 	<div class="tagsdropdown" style="position:relative;">
+
 		<span v-for="(tag, i) in tags" class="tag label label-info">
 			<component :is="tagscomponent" :tag="tag.text" @remove="removeTag(tag.value)"></component>
 		</span>
+
 		<drop-down v-if="hasOptions" :data="menu" :text="text" @hit="hit"></drop-down>
+
+		<input type="hidden" v-for="tag in tags" :name="getName" :value="tag.value" />
+
 	</div>
 </template>
 
@@ -82,6 +87,9 @@
 			},
 			hasOptions : function() {
 				return this.menu.length > 0;
+			},
+			getName : function() {
+				return this.name ? this.name + '[]' : this.text + '[]';
 			}
 		},
 
@@ -106,6 +114,7 @@
 					return option;
 				});
 				this.setTags();
+				this.$emit('added',this.find(tagvalue));
 			},
 			removeTag : function(tagvalue) {
 				this.options = this.options.map(option => {
@@ -114,6 +123,10 @@
 				});
 				//console.log(this.options);
 				this.setTags();
+				this.$emit('removed',this.find(tagvalue));
+			},
+			find : function(value) {
+				return this.options.filter(option => option.value == value)[0];
 			},
 			setOptions : function(options) {
 				this.options = options;

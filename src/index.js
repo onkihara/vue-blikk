@@ -15,6 +15,7 @@ editArea = require('./Editarea.vue')
 editDropdown = require('./Editdropdowninput.vue')
 editTypeahead = require('./Edittypeahead.vue')
 editTagsinput = require('./Edittagsinput.vue')
+editTagsdropdown = require('./Edittagsdropdown.vue')
 editGeocoordinates = require('./EditGeocoordinates.vue')
 editQrcode = require('./EditQrcode.vue')
 
@@ -35,6 +36,7 @@ const VueBlikk = {
   editDropdown,
   editTypeahead,
   editTagsinput,
+  editTagsdropdown,
   editGeocoordinates,
   editQrcode
 }

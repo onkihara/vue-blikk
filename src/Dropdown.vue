@@ -1,5 +1,5 @@
 <template>
-	<div :class="[ getGrouped, behaviour, { open : open }]" v-click-outside="open = false">
+	<div :class="[ getGrouped, behaviour, { open : open }]" v-click-outside="clickedOutside">
 		<button :class="getType" class="btn dropdown-toggle" type="button" :id="tmpid" @click="open = !open" aria-haspopup="true" :aria-expanded="open ? 'true' : 'false'">
 			{{ text }}
 			<span class="caret"></span>
@@ -88,6 +88,9 @@
 			},
 			setMenu : function(items) {
 				this.menu = items;
+			},
+			clickedOutside : function() {
+				this.open = false;
 			}
 
 		},
