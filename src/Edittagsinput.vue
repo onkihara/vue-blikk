@@ -101,7 +101,8 @@
         },
 
         mounted : function() {
-            this.setTags(this.$slots.default[0].text);
+            var text = this.$slots.default ? this.$slots.default[0].text : '';
+            this.setTags(text);
             this.val = this.old = this.getTags(this.tags);
         },
 

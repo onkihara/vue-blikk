@@ -127,6 +127,7 @@
             precision : { type : String, default : EXP.toString() },
             textMap : { type : String, default : 'Map'},
             iconMap : { type : String, default : ''},
+            preventVoid : { type : Boolean, default : true },
             // google-api properties
             usemap : { type : Boolean, default: false },
             apilat : { type : String, default : '46.49942984' },
@@ -190,6 +191,10 @@
                 this.long = coords.long !== null ? coords.long.toString() : null;
                 this.type = coords.type.toString();
                 this.azoom = coords.zoom.toString();
+                // don't send void values
+                if (this.preventVoid && (this.lat === null || this.long === null)) {
+                    return;
+                }
                 this.store();
                 this.oldlat = this.lat;
                 this.oldlong = this.long;
@@ -204,6 +209,7 @@
             },
 
             clickedOutside() {
+                if ( ! this.editor) return;
                 this.$refs.geoinput.enterAll();
             },
 

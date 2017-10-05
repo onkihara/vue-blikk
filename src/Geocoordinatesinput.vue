@@ -255,10 +255,11 @@
             recalcLat : function(coord, settype=true) {
                 coord = coord || this.latvalue;
                 var lat = this.parse(coord,settype);
+                //console.log('Lat: ' + lat);
                 // Plausibilität
-                if (Math.abs(lat) > 90.0) {
-                    this.lat = 0;
-                    this.latvalue = "Not valid!";
+                if (! lat || Math.abs(lat) > 90.0) {
+                    this.lat = null;
+                    this.latvalue = "";
                     this.lats = {};
                     return;
                 }
@@ -270,10 +271,11 @@
             recalcLong : function(coord, settype=true) {
                 coord = coord || this.longvalue;
                 var long = this.parse(coord,settype);
+                //console.log('Long: ' + long);
                 // Plausibilität
-                if (Math.abs(long) > 180.0) {
-                    this.long = 0;
-                    this.longvalue = "Not valid!";
+                if ( ! long || Math.abs(long) > 180.0) {
+                    this.long = null;
+                    this.longvalue = "";
                     this.longs = {};
                     return;
                 }
@@ -366,6 +368,7 @@
             },
 
             parse : function(coord, settype=true) {
+                if (coord == '') return;
                 coord = ''+coord;
                 // test for cardinal point (N,E,S,W)
                 var cardinalpoint, s = '';

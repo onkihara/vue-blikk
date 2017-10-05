@@ -18,7 +18,7 @@ export default {
 		if (this.data) {
 			this.tags = this.data;
 		} else {
-			this.val = this.$slots.default[0].text;
+			this.val = this.$slots.default ? this.$slots.default[0].text : '';
 			this.setTags();
 		}
 	},
