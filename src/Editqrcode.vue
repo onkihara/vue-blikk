@@ -8,21 +8,25 @@
         @mouseleave="showEditicon(false)"
     >
         
-        <slide-away ref="slideaway">
+        <slide-away ref="slideaway" @opened="edit" @closed="done">
 
             <div slot="front">
                 <qr-code :width="width" :placeholder="placeholder" :title="title" :source="src" :download="download"></qr-code>
             </div>
 
-           <span slot="right" v-html="editiconRight" @click="edit" v-show="isOver"></span>
+           <span slot="right" v-html="editiconRight" v-show="isOver"></span>
 
-            <div slot="back">
-                <div class="form-group">
-                    <textarea ref="input" class="qrcontent form-control" @keyup.esc="esc" @blur="blur" v-model="content"></textarea>
+            <div :class="{ half : (editableContent && colorPicker) }" slot="back">
+
+                <div v-if="editableContent" class="qrcontent form-group">
+                    <textarea ref="input" class="form-control" @keyup.esc="esc" @blur="blur" v-model="content"></textarea>
                 </div>
+
+                <compact-picker class="qrpicker" ref="colorpicker" v-if="colorPicker" :value="color" :palette="palette" @input="changeColor"></compact-picker>
+
             </div>
 
-            <span slot="left" v-html="editiconLeft" @click.prevent="done"></span>
+            <span slot="left" v-html="editiconLeft"></span>
 
         </slide-away>
 
@@ -39,14 +43,21 @@
     import _ from 'lodash';
     import Qrcode from './Qrcode.vue'
     import Slideaway from './Slideaway.vue'
+    import { Compact } from 'vue-color';
 
     const DELAY = 1000;
+    const PALETTE = [
+      '#F44E3B', '#68BC00', '#16A5A5', '#009CE0', '#7B64FF', '#FA28FF',
+      '#000000', '#666666', '#B3B3B3', '#9F0500', '#C45100', '#FB9E00',
+      '#808900', '#194D33', '#0C797D', '#0062B1', '#653294', '#AB149E'
+    ];
 
     export default {
 
         components : {
             'qr-code' : Qrcode,
-            'slide-away' : Slideaway
+            'slide-away' : Slideaway,
+            'compact-picker' : Compact
         },
 
         mounted : function() {
@@ -59,7 +70,10 @@
             // fill editicon-slots
             this.editiconRight = this.$refs.right.innerHTML || '<span class="editicon">[edit]</span>';
             this.editiconLeft = this.$refs.left.innerHTML || '<span class="editicon">[done]</span>';
-            this.content = this.oldcontent = this.sanitize(this.$refs.content.textContent);
+            if (this.editableContent) {
+                this.content = this.oldcontent = this.sanitize(this.$refs.content.textContent);
+            } 
+            this.color =  this.defaultColor;
         },
 
         props : {
@@ -77,6 +91,10 @@
             callbackdone : { type : Function, default : function(message) { console.log(message); }},
             callbackerror : { type : Function, default : function(error) { console.log(error); }},
             onHover : { type : Boolean, default: true },
+            editableContent : { type : Boolean, default: true },
+            colorPicker : { type : Boolean, default: false },
+            defaultColor : { type : String, default: '#000000' },
+            palette : { type : Array, default() { return PALETTE; } }
          },
 
         data : function() {
@@ -87,6 +105,7 @@
                 editiconLeft : '',
                 content : '',
                 oldcontent : '',
+                color : '',
                 fberror : false,
                 fbdone : false,
                 isOver : ! this.onHover,
@@ -110,6 +129,7 @@
                 var data = {};
                 data['id'] = this.daoId;
                 data[this.name] = this.content;
+                data['color'] = this.color;
                 this.$emit('done',data);
                 // save only changes
                 if (this.content != this.oldcontent) {
@@ -135,6 +155,15 @@
                 } 
             },
 
+            changeColor(color) {
+                // something to do?
+                if (color.hex == this.color) {
+                    return;
+                }
+                this.color = color.hex
+                this.store();
+            },
+
             setSource(src) {
                 src = src || this.src;
                 var divider = /\?/.test(src) ? '&' : '?';
@@ -149,8 +178,10 @@
             // events
 
             edit() {
-                this.$refs.input.focus();
-                this.$emit('edit',this.content);
+                if (this.editableContent) {
+                    this.$refs.input.focus();
+                    this.$emit('edit',this.content);
+                }
             },
 
             esc() {
@@ -159,13 +190,15 @@
             },
 
             done() {
-                if (this.generator == '') this.esc();
-                this.$refs.slideaway.close();
-                this.store();                    
+                if (this.generator == '') {
+                    return;
+                }
+                this.store();
             },
 
             blur() {
                 if (this.onBlur) {
+                    this.$refs.slideaway.close();
                     this.done();
                 }
             },
@@ -222,8 +255,12 @@
             cursor:pointer;
         }
 
-        .back > div, .back > div > div, .qrcontent {
+        .back > div, .back > div > div {
             height:100%;
+        } 
+
+        .back > div.half > div {
+            height:50%;
         }
 
         .qrcontent {
@@ -231,6 +268,35 @@
             max-height:$size;
             margin:auto;
             padding-top:45px;
+            textarea {
+                height:100%;
+            }
+        }
+
+        .qrpicker {
+            margin-top:45px;
+            &.vc-compact {
+                width:100%;
+                border:0;
+                background:transparent;
+                box-shadow:none;
+
+                .vc-compact-colors {
+                    display:flex;
+                    flex-wrap:wrap;
+                    justify-content:center;
+
+                    .vc-compact-color-item {
+                        width:35px;
+                        height:35px;
+                        margin:5px;
+                    }
+                }
+            }
+        }
+
+        .back > div.half .qrpicker {
+            margin-top:3px;
         }
     }
 

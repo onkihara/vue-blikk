@@ -11,11 +11,34 @@
 		name="code"
 		source=""
 		download=""
+		:on-blur="false"
+		:editable-content="true"
+		:color-picker="true"
+		default-color="#9F0500"
+    >
+
+    	<span  slot="edit" class="glyphicon glyphicon-pencil"></span>
+    	<span  slot="done" class="glyphicon glyphicon-remove"></span>
+    	{{ content }}
+    	
+    </edit-qrcode>
+
+    <hr />
+
+    <edit-qrcode
+		width="300px"
+		placeholder="../dist/logo.png"
+		generator=""
+		name="code"
+		source=""
+		download=""
 		:on-blur="true"
     >
+
     	<span  slot="edit" class="glyphicon glyphicon-pencil"></span>
     	<span  slot="done" class="glyphicon glyphicon-ok"></span>
     	{{ content }}
+
     </edit-qrcode>
 
     <hr />
@@ -34,8 +57,8 @@
 
 <script>
 
-	import Qrcode from '../Qrcode.vue'
-	import Editqrcode from '../Editqrcode.vue'
+	import Qrcode from '../Qrcode.vue';
+	import Editqrcode from '../Editqrcode.vue';
  
 	export default {
 
@@ -49,9 +72,14 @@
 		data () {
 			return {
 				msg: 'QR-Code-Test',
-				content : "Länge: 34,345445345\nBreite: 11,2454354"
+				content : "Länge: 34,345445345\nBreite: 11,2454354",
+				palette : [
+				  '#F44E3B', '#68BC00', '#16A5A5', '#009CE0', '#7B64FF', '#FA28FF',
+				  '#000000', '#666666', '#B3B3B3', '#9F0500', '#C45100', '#FB9E00',
+				  '#808900', '#194D33', '#0C797D', '#0062B1', '#653294', '#AB149E'
+				]
 			}
-		}
+		},
 	}
 
 </script>

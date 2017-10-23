@@ -30,9 +30,11 @@
         methods : {
             open() {
                 this.isAway = true;
+                this.$emit('opened');
             },
             close() {
                 this.isAway = false;
+                this.$emit('closed');
             }
         }
 
