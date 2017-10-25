@@ -18,7 +18,7 @@
     export default {
 
         props : {
-            
+            locked : { type : Boolean, default : false }
         },
 
         data : function() {
@@ -29,12 +29,18 @@
 
         methods : {
             open() {
+                if (this.locked) {
+                    return;
+                }
                 this.isAway = true;
                 this.$emit('opened');
             },
             close() {
                 this.isAway = false;
                 this.$emit('closed');
+            },
+            closeSilently() {
+                this.isAway = false;
             }
         }
 

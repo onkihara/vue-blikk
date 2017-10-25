@@ -8,21 +8,21 @@
         @mouseleave="showEditicon(false)"
     >
         
-        <slide-away ref="slideaway" @opened="edit" @closed="done">
+        <slide-away ref="slideaway" @opened="edit" @closed="doneContent" :locked="!isEditable">
 
             <div slot="front">
                 <qr-code :width="width" :placeholder="placeholder" :title="title" :source="src" :download="download"></qr-code>
             </div>
 
-           <span slot="right" v-html="editiconRight" v-show="isOver"></span>
+           <span slot="right" v-html="editiconRight" v-show="isOver && isEditable"></span>
 
-            <div :class="{ half : (editableContent && colorPicker) }" slot="back">
+            <div :class="{ half : (viewContent && colorPicker) }" slot="back">
 
-                <div v-if="editableContent" class="qrcontent form-group">
-                    <textarea ref="input" class="form-control" @keyup.esc="esc" @blur="blur" v-model="content"></textarea>
+                <div v-if="viewContent" class="qrcontent form-group">
+                    <textarea ref="input" class="form-control" @keyup.esc="esc" @blur="blur" v-model="content" :disabled="!editableContent"></textarea>
                 </div>
 
-                <compact-picker class="qrpicker" ref="colorpicker" v-if="colorPicker" :value="color" :palette="palette" @input="changeColor"></compact-picker>
+                <compact-picker class="qrpicker" ref="colorpicker" v-if="colorPicker" :value="actColor" :palette="palette" @input="changeColor"></compact-picker>
 
             </div>
 
@@ -60,20 +60,15 @@
             'compact-picker' : Compact
         },
 
-        mounted : function() {
+        mounted() {
             // calc height
-            if (this.width == 'auto') {
-                this.qrSize = { height : this.$refs.eqrsize.offsetWidth + 'px' };
-            } else {
-                this.qrSize = { width: this.width, height : this.width };
+            if (this.width != 'auto') {
+                this.qrSize = { width: this.width };
             }
             // fill editicon-slots
             this.editiconRight = this.$refs.right.innerHTML || '<span class="editicon">[edit]</span>';
             this.editiconLeft = this.$refs.left.innerHTML || '<span class="editicon">[done]</span>';
-            if (this.editableContent) {
-                this.content = this.oldcontent = this.sanitize(this.$refs.content.textContent);
-            } 
-            this.color =  this.defaultColor;
+            this.content = this.oldcontent = this.sanitize(this.$refs.content.textContent);
         },
 
         props : {
@@ -83,21 +78,24 @@
             download : { type : String, default : '' },
             placeholder : { type : String, default : '' },
             // edit-qrcode-props
+            isEditable : { type : Boolean, default: true },
             width : { type : String, default : 'auto' },
             name : { type : String, default : 'qrcode' },
             daoId : { type : String, default : '' },
             generator : { type : String, default : '' },
             onBlur : { type : Boolean, default: false },
+            storeOnExit : { type : Boolean, default: true },
             callbackdone : { type : Function, default : function(message) { console.log(message); }},
             callbackerror : { type : Function, default : function(error) { console.log(error); }},
             onHover : { type : Boolean, default: true },
+            viewContent : { type : Boolean, default: true },
             editableContent : { type : Boolean, default: true },
             colorPicker : { type : Boolean, default: false },
-            defaultColor : { type : String, default: '#000000' },
+            color : { type : String, default: '#000000' },
             palette : { type : Array, default() { return PALETTE; } }
          },
 
-        data : function() {
+        data() {
             return {
                 src : this.source,
                 qrSize : '',
@@ -105,7 +103,7 @@
                 editiconLeft : '',
                 content : '',
                 oldcontent : '',
-                color : '',
+                actColor : this.color,
                 fberror : false,
                 fbdone : false,
                 isOver : ! this.onHover,
@@ -125,42 +123,52 @@
                 return _.trim(text);
             },
 
-            store : function() {
+            store() {
                 var data = {};
                 data['id'] = this.daoId;
                 data[this.name] = this.content;
-                data['color'] = this.color;
+                data['color'] = this.actColor;
                 this.$emit('done',data);
                 // save only changes
-                if (this.content != this.oldcontent) {
-                    Axios.put(this.generator, data)
-                        .then((response) => {
-                            this.fbdone = true;
-                            this.cleardone();
-                            // remember new
-                            this.oldcontent = this.content;
-                            // set new src with uniqid
-                            if (response.data.src) {
-                                this.setSource(response.data.src);
-                            }
-                            this.callbackdone(response);
-                        })
-                        .catch((error) => {
-                            this.fberror = true;
-                            this.clearerror();
-                            // restore old
-                            this.esc();
-                            this.callbackerror(error);
-                        });
-                } 
+                Axios.put(this.generator, data)
+                    .then((response) => {
+                        this.fbdone = true;
+                        this.cleardone();
+                        // remember new
+                        this.oldcontent = this.content;
+                        // set new src with uniqid
+                        if (response.data.src) {
+                            this.setSource(response.data.src);
+                        }
+                        this.esc();
+                        this.callbackdone(response);
+                    })
+                    .catch((error) => {
+                        this.fberror = true;
+                        this.resetColor();
+                        this.clearerror();
+                        // restore old
+                        this.esc();
+                        this.callbackerror(error);
+                    });
+            },
+
+            doneContent() {
+                if ( ! this.storeOnExit || this.generator == '' || ! this.editableContent) {
+                    return;
+                }
+                if ( this.content == this.oldcontent ) {
+                    return;
+                }
+                this.store();
             },
 
             changeColor(color) {
                 // something to do?
-                if (color.hex == this.color) {
+                if (color.hex == this.actColor) {
                     return;
                 }
-                this.color = color.hex
+                this.actColor = color.hex
                 this.store();
             },
 
@@ -178,7 +186,7 @@
             // events
 
             edit() {
-                if (this.editableContent) {
+                if (this.viewContent) {
                     this.$refs.input.focus();
                     this.$emit('edit',this.content);
                 }
@@ -186,32 +194,30 @@
 
             esc() {
                 this.content = this.oldcontent;
-                this.$refs.slideaway.close();
-            },
-
-            done() {
-                if (this.generator == '') {
-                    return;
-                }
-                this.store();
+                this.resetColor();
+                this.$refs.slideaway.closeSilently();
             },
 
             blur() {
                 if (this.onBlur) {
                     this.$refs.slideaway.close();
-                    this.done();
                 }
+            },
+
+            resetColor() {
+                this.actColor = this.color;
+
             },
 
             // callbacks
 
-            clearerror : function () {
+            clearerror () {
                 _.delay(function (me) {
                     me.fberror = false;
                 }, this.fbdelay, this);
             },
 
-            cleardone : function () {
+            cleardone () {
                 _.delay(function (me) {
                     me.fbdone = false;
                 }, this.fbdelay, this);
@@ -228,8 +234,6 @@
 </script>
 
 <style lang="scss">
-
-    $size:400px;
 
     .edit-qrcode {
 
@@ -264,8 +268,6 @@
         }
 
         .qrcontent {
-            max-width:$size;
-            max-height:$size;
             margin:auto;
             padding-top:45px;
             textarea {
@@ -280,6 +282,7 @@
                 border:0;
                 background:transparent;
                 box-shadow:none;
+                padding:0;
 
                 .vc-compact-colors {
                     display:flex;
@@ -287,9 +290,9 @@
                     justify-content:center;
 
                     .vc-compact-color-item {
-                        width:35px;
-                        height:35px;
-                        margin:5px;
+                        width:12%;
+                        padding-top:12%;
+                        margin:2%;
                     }
                 }
             }

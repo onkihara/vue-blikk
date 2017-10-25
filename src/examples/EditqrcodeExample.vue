@@ -5,16 +5,16 @@
     <hr />
 
     <edit-qrcode
-		width="300px"
 		placeholder="../dist/logo.png"
-		generator=""
+		generator="test"
 		name="code"
 		source=""
 		download=""
 		:on-blur="false"
-		:editable-content="true"
+		:store-on-exit="false"
+		:view-content="false"
 		:color-picker="true"
-		default-color="#9F0500"
+		color="#9F0500"
     >
 
     	<span  slot="edit" class="glyphicon glyphicon-pencil"></span>
@@ -28,7 +28,31 @@
     <edit-qrcode
 		width="300px"
 		placeholder="../dist/logo.png"
-		generator=""
+		generator="test"
+		name="code"
+		source=""
+		download=""
+		:on-blur="false"
+		:store-on-exit="false"
+		:view-content="true"
+		:editable-content="false"
+		:color-picker="true"
+		color="#9F0500"
+		:is-editable="true"
+    >
+
+    	<span  slot="edit" class="glyphicon glyphicon-pencil"></span>
+    	<span  slot="done" class="glyphicon glyphicon-remove"></span>
+    	{{ content }}
+    	
+    </edit-qrcode>
+
+    <hr />
+
+    <edit-qrcode
+		width="300px"
+		placeholder="../dist/logo.png"
+		generator="test"
 		name="code"
 		source=""
 		download=""

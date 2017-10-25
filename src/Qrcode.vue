@@ -12,10 +12,8 @@
 
         mounted : function() {
             // calc height
-            if (this.width == 'auto') {
-                this.qrHeight = { height : this.$refs.qrcode.offsetWidth + 'px' };
-            } else {
-                this.qrHeight = { width: this.width, height : this.width };
+            if (this.width != 'auto') {
+                this.qrHeight = { width: this.width };
             }
             // initial render or placeholder
             this.src = this.source ? this.source : this.placeholder;      
@@ -67,14 +65,23 @@
 
 <style lang="scss">
 
-    $size:400px;
-
     .qr-code {
-        max-width:$size;
-        max-height:$size;
         margin:auto;
+        width:100%;
+        position:relative;
+
+        &:before{
+            content: "";
+            display: block;
+            padding-top: 100%;  /* initial ratio of 1:1*/
+        }
 
         a.qrfield {
+            position:  absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
             float:left;
             display:block;
             width:100%;
