@@ -2,12 +2,12 @@
     <div class="qr-code" :style="qrHeight" ref="qrcode">
         
         <a ref="qrimage" class="qrfield" :href="download" :title="title" :style="qrStyle" @click="clicked($event)"></a>
-        
+
     </div>
 </template>
 
 <script>
-
+    
     export default {
 
         mounted : function() {
@@ -24,13 +24,15 @@
             title : { type : String, default : 'qrcode' },
             source : { type : String, default : '' },
             download : { type : String, default : '' },
+            isLightbox : { type : Boolean, default : false },
             placeholder : { type : String, default : '' },
          },
 
         data : function() {
             return {
                 src : '',
-                qrHeight : ''
+                qrHeight : '',
+                modalOpen : false
              }
         },
 
@@ -55,7 +57,29 @@
 
             clicked(ev) {
                 this.$emit('click',ev);
-                if (this.download == '') { ev.preventDefault() }
+                if (this.isLightbox) { 
+                    ev.preventDefault();
+                    this.lightUp();
+                } 
+                if (this.download == '') { 
+                    ev.preventDefault();
+                }
+                // else default-event
+            },
+
+            lightUp() {
+                this.$emit('light',this.source);
+                var div = document.createElement('div');
+                div.setAttribute('id','qr-code-lightbox-id');
+                div.className = 'qr-code-lightbox';
+                div.innerHTML = '<img src="' + this.source + '" />';
+                document.body.appendChild(div);
+                document.getElementById('qr-code-lightbox-id').addEventListener('click',this.lightDown);
+            },
+
+            lightDown() {
+                var element = document.getElementById("qr-code-lightbox-id");
+                element.parentNode.removeChild(element); 
             }
          
         },
@@ -64,6 +88,23 @@
 </script>
 
 <style lang="scss">
+
+    div.qr-code-lightbox {
+        position:fixed;
+        top:0px;
+        left:0px;
+        right:0px;
+        bottom:0px;
+        background-color:rgba(0,0,0,.3);
+        z-index:1050;
+        display:flex;
+        justify-content: center;
+
+        img {
+            display:block;
+            align-self:center;
+        }
+    }
 
     .qr-code {
         margin:auto;

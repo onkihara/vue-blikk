@@ -11,7 +11,7 @@
         <slide-away ref="slideaway" @opened="edit" @closed="doneContent" :locked="!isEditable">
 
             <div slot="front">
-                <qr-code :width="width" :placeholder="placeholder" :title="title" :source="src" :download="download"></qr-code>
+                <qr-code width="auto" :placeholder="placeholder" :title="title" :source="src" :download="download" :is-lightbox="isLightbox"></qr-code>
             </div>
 
            <span slot="right" v-html="editiconRight" v-show="isOver && isEditable"></span>
@@ -76,6 +76,7 @@
             title : { type : String, default : 'qrcode' },
             source : { type : String, default : '' },
             download : { type : String, default : '' },
+            isLightbox : { type : Boolean, default : false },
             placeholder : { type : String, default : '' },
             // edit-qrcode-props
             isEditable : { type : Boolean, default: true },
@@ -85,7 +86,7 @@
             generator : { type : String, default : '' },
             onBlur : { type : Boolean, default: false },
             storeOnExit : { type : Boolean, default: true },
-            callbackdone : { type : Function, default : function(message) { console.log(message); }},
+            callbackdone : { type : Function, default : function(message) { /*console.log(message);*/ }},
             callbackerror : { type : Function, default : function(error) { console.log(error); }},
             onHover : { type : Boolean, default: true },
             viewContent : { type : Boolean, default: true },
@@ -140,7 +141,7 @@
                         if (response.data.src) {
                             this.setSource(response.data.src);
                         }
-                        this.esc();
+                        this.$refs.slideaway.close();
                         this.callbackdone(response);
                     })
                     .catch((error) => {
@@ -226,7 +227,7 @@
             showEditicon(onoff) {
                 if ( ! this.onHover ) return;
                 this.isOver = onoff;
-            }
+            },
 
         },
 
@@ -239,6 +240,13 @@
 
         transition: background-color 0.5s;
         background-color:transparent;
+        position:relative;
+
+        &:before{
+            content: "";
+            display: block;
+            padding-top: 100%;  /* initial ratio of 1:1*/
+        }
 
         &.done {
             background-color: #b0dac2;
@@ -246,6 +254,14 @@
 
         &.error {
             background-color: #dab0c7;
+        }
+
+        .slide-away {
+            position:absolute;
+            top:0px;
+            left:0px;
+            right:0px;
+            bottom:0px;
         }
 
         .editicon {

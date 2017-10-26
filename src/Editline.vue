@@ -1,13 +1,19 @@
 <template>
     <span :class="{ error : fberror, done : fbdone }" class="edit-line" @mouseenter="showEditicon(true)" @mouseleave="showEditicon(false)">
     
-        <span ref="text" v-if="!editmode">
+        <span ref="text" v-if="!editmode && !isLink">
             <slot></slot>
         </span>
+
+        <a :href="getLink" ref="text" v-if="!editmode && isLink">
+            <slot></slot>
+        </a>
 
         <a v-if="!editmode" @click.stop.prevent="edit" class="" v-show="isOver">
             <slot name="editicon"><span class="editicon">[edit]</span></slot>
         </a>
+
+        <span class="charlimiter" :class="runningOut" v-if="limitChars > 0 && editmode" v-text="limit"></span>
 
         <input 
             ref="input" 
@@ -17,8 +23,10 @@
             @blur="leave" 
             @keydown.enter.stop="leave"
             @keydown.esc.stop="reset"
+            @keyup="limitLength"
             v-model="val" 
         />
+
 
     </span>
 </template>
@@ -27,10 +35,13 @@
 
     import Axios from 'axios';
     import _ from 'lodash';
+    import Limitlength from './mixins/MixinLimitlength.js';
 
     const DELAY = 1000;
 
     export default {
+
+        mixins : [ Limitlength ],
 
         props : {
             daoId : { type : Number, default : null },
@@ -38,9 +49,11 @@
             href : { type : String, default : '' },
             placeholder : { type : String, default : '' },
             delay : { type : Number, default : DELAY },
-            callbackdone : { type : Function, default : function(message) { console.log(message); }},
+            callbackdone : { type : Function, default : function(message) { /*console.log(message);*/ }},
             callbackerror : { type : Function, default : function(error) { console.log(error); }},
             onHover : { type : Boolean, default: true },
+            isLink : { type : Boolean, default: false },
+            limitChars : { type : Number, default: 0 },
         },
 
         data : function() {
@@ -52,6 +65,7 @@
                 fberror : false,
                 fbdone : false,
                 isOver : ! this.onHover,
+                limit : this.limitChars,
             }
         },
 
@@ -60,7 +74,19 @@
             this.setPlaceholder();
         },
 
-        methods : {
+        computed : {
+            getLink() {
+                if (this.val.substring(0,3) == 'http') {
+                    return this.val;
+                } else if (/\S+@\S+\.\S+/.test(this.val)) {
+                    return 'mailto:' + this.val;
+                } else {
+                    return 'http://' + this.val;
+                }
+            }
+        },
+
+         methods : {
             setPlaceholder : function() {
                 if (this.val == '' && this.placeholder != '') {
                     this.$refs.text.innerHTML = '<span class="placeholder">'+this.placeholder+'</span>';
@@ -143,6 +169,7 @@
 
         transition: background-color 0.5s;
         background-color:transparent;
+        position:relative;
 
         &.done {
             background-color: #b0dac2;
@@ -171,6 +198,28 @@
 
         .placeholder {
             color:lightgrey;
+        }
+
+        /* for MixinLimitlength */
+
+        .charlimiter {
+            background-color:lightgrey;
+            max-width:50px;
+            padding:5px;
+            font-size:.6em;
+            position:absolute;
+            right:5px;
+            top:1px;
+
+            &.running-out {
+                color:red;
+            }
+
+            &.ran-out {
+                color:inherit;
+                background-color:red;
+            }
+
         }
 
     }

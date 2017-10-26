@@ -5,16 +5,18 @@
     <hr />
 
     <edit-qrcode
+    	width="40%"
 		placeholder="../dist/logo.png"
 		generator="test"
 		name="code"
-		source=""
+		source="../dist/logo.png"
 		download=""
 		:on-blur="false"
 		:store-on-exit="false"
 		:view-content="false"
 		:color-picker="true"
 		color="#9F0500"
+		:is-lightbox="true"
     >
 
     	<span  slot="edit" class="glyphicon glyphicon-pencil"></span>
@@ -39,6 +41,7 @@
 		:color-picker="true"
 		color="#9F0500"
 		:is-editable="true"
+		:is-lightbox="false"
     >
 
     	<span  slot="edit" class="glyphicon glyphicon-pencil"></span>
@@ -75,7 +78,6 @@
     >
     </qr-code>
 
- 	
   </div>
 </template>
 
@@ -101,9 +103,13 @@
 				  '#F44E3B', '#68BC00', '#16A5A5', '#009CE0', '#7B64FF', '#FA28FF',
 				  '#000000', '#666666', '#B3B3B3', '#9F0500', '#C45100', '#FB9E00',
 				  '#808900', '#194D33', '#0C797D', '#0062B1', '#653294', '#AB149E'
-				]
+				],
 			}
 		},
+
+		methods : {
+
+		}
 	}
 
 </script>

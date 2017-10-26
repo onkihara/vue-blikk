@@ -52,7 +52,6 @@
         padding:0px;
         position:relative;
         overflow:hidden;
-        margin-bottom:10px;
         a.slide {
             position:absolute;
             width:40px;

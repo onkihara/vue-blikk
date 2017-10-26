@@ -4,17 +4,35 @@
 
 	<h2><edit-line 
 		name="title" 
+		:is-link="true"
+		href="http://localhost:8080/request.html" 
+		colorerror="red"
+		placeholder="Mit Zeichenbegrenzung"
+		:limit-chars="10"
+	>
+		Textvielzulang
+	</edit-line></h2>
+
+	<hr />
+
+	<h2><edit-line 
+		name="title" 
 		href="http://localhost:8080/request.html" 
 		colorerror="red"
 		placeholder="Zeile zum ändern ..."
 	></edit-line></h2>
+
+	<hr />
 
 	<h2><edit-area 
 		name="info" 
 		placeholder="Weitere Informationen ..." 
 		:br="true" 
 		href="http://localhost:8080/request.html"
-	>	</edit-area></h2>
+		:limit-chars="10"
+	>
+		Einvielzulangertext
+	</edit-area></h2>
 
 
   </div>

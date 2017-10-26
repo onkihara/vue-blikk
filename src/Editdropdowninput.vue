@@ -60,7 +60,7 @@
             name : { type : String, default : 'name' },
             href : { type : String, default : '' },
             fbdelay : { type : Number, default : FBDELAY },
-            callbackdone : { type : Function, default : function(message) { console.log(message); }},
+            callbackdone : { type : Function, default : function(message) { /*console.log(message);*/ }},
             callbackerror : { type : Function, default : function(error) { console.log(error); }},
             onHover : { type : Boolean, default: true },
        },

@@ -9,12 +9,15 @@
             <slot name="editicon"><span class="editicon">[edit]</span></slot>
         </a>
 
+        <span class="charlimiter" :class="runningOut" v-if="limitChars > 0 && editmode" v-text="limit"></span>
+
         <textarea 
             ref="input" 
             v-if="editmode" 
             :placeholder="placeholder"
             @blur="leave" 
             @keydown.esc.stop="reset"
+            @keyup="limitLength"
             v-model="val" 
         ></textarea>
 
@@ -25,10 +28,13 @@
 
     import Axios from 'axios';
     import _ from 'lodash';
+    import Limitlength from './mixins/MixinLimitlength.js';
 
     const DELAY = 1000;
 
     export default {
+
+        mixins : [ Limitlength ],
 
         props : {
             daoId : { type : Number, default : null },
@@ -38,7 +44,7 @@
             value : { type : String },
             placeholder : { type : String, default : '' },
             br : { type : Boolean, default: false }, // beware line-breaks <br />
-            callbackdone : { type : Function, default : function(message) { console.log(message); }},
+            callbackdone : { type : Function, default : function(message) { /*console.log(message);*/ }},
             callbackerror : { type : Function, default : function(error) { console.log(error); }},
             onHover : { type : Boolean, default: true },
         },
@@ -160,6 +166,8 @@
 
         transition: background-color 0.5s;
         background-color:transparent;
+        position:relative;
+        display:block;
 
         &.done {
             background-color: #b0dac2;
@@ -189,6 +197,28 @@
 
         .placeholder {
             color:lightgrey;
+        }
+
+       /* for MixinLimitlength */
+
+        .charlimiter {
+            background-color:lightgrey;
+            max-width:50px;
+            padding:5px;
+            font-size:.6em;
+            position:absolute;
+            right:2px;
+            top:8px;
+
+            &.running-out {
+                color:red;
+            }
+
+            &.ran-out {
+                color:inherit;
+                background-color:red;
+            }
+
         }
 
     }
