@@ -103,6 +103,8 @@
         img {
             display:block;
             align-self:center;
+            background-color:white;
+            border:3em solid white;
         }
     }
 
