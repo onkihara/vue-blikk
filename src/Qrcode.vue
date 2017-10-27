@@ -72,16 +72,16 @@
                 var div = document.createElement('div');
                 div.setAttribute('id','qr-code-lightbox-id');
                 div.className = 'qr-code-lightbox';
-                div.innerHTML = '<img src="' + this.source + '" />';
+                div.innerHTML = '<div><img src="' + this.source + '" /></div>';
                 document.body.appendChild(div);
-                document.getElementById('qr-code-lightbox-id').addEventListener('click',this.lightDown);
+                document.getElementById('qr-code-lightbox-id').addEventListener('click',
+                    function() {
+                        var element = document.getElementById("qr-code-lightbox-id");
+                        element.parentNode.removeChild(element); 
+                    }
+                );
             },
 
-            lightDown() {
-                var element = document.getElementById("qr-code-lightbox-id");
-                element.parentNode.removeChild(element); 
-            }
-         
         },
 
     }
@@ -95,17 +95,34 @@
         left:0px;
         right:0px;
         bottom:0px;
-        background-color:rgba(0,0,0,.3);
+        background-color:rgba(0,0,0,.4);
         z-index:1050;
         display:flex;
         justify-content: center;
 
-        img {
+        &:before {
+            font-family: 'Glyphicons Halflings';
+            content:"\e014";
+            position:absolute;
+            top:10px;
+            right:18px;
+            font-size:1.5em;
+            color:white;
+            cursor:pointer;
+        }
+        
+        > div {
             display:block;
             align-self:center;
             background-color:white;
             border:3em solid white;
+
+            img {
+                width:100%;
+                height:auto;
+            }
         }
+
     }
 
     .qr-code {

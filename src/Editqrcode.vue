@@ -304,12 +304,22 @@
                     display:flex;
                     flex-wrap:wrap;
                     justify-content:center;
+                    position:relative;
+                    align-content:space-around;
 
                     .vc-compact-color-item {
                         width:12%;
-                        padding-top:12%;
-                        margin:2%;
+                        height:auto;
+                        margin:5px;
+                        /* padding-top:12%; */
+
+                        &:before {
+                            content: "";
+                            display: block;
+                            padding-top: 100%;
+                        }
                     }
+
                 }
             }
         }
