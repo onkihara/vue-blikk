@@ -57,7 +57,7 @@
 
             clicked(ev) {
                 this.$emit('click',ev);
-                if (this.isLightbox) { 
+                if (this.isLightbox && this.source != '') { 
                     ev.preventDefault();
                     this.lightUp();
                 } 
@@ -67,6 +67,7 @@
                 // else default-event
             },
 
+            // appends overlay to body
             lightUp() {
                 this.$emit('light',this.source);
                 var div = document.createElement('div');

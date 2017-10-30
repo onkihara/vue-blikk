@@ -18,6 +18,7 @@ editTagsinput = require('./Edittagsinput.vue')
 editTagsdropdown = require('./Edittagsdropdown.vue')
 editGeocoordinates = require('./EditGeocoordinates.vue')
 editQrcode = require('./EditQrcode.vue')
+editSelectoverinput = require('./editSelectoverinput.vue')
 
 const VueBlikk = {
   slideAway,
@@ -38,7 +39,8 @@ const VueBlikk = {
   editTagsinput,
   editTagsdropdown,
   editGeocoordinates,
-  editQrcode
+  editQrcode,
+  editSelectoverinput
 }
 
 module.exports = VueBlikk

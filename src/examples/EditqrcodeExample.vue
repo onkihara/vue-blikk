@@ -41,7 +41,7 @@
 		:color-picker="true"
 		color="#9F0500"
 		:is-editable="true"
-		:is-lightbox="false"
+		:is-lightbox="true"
     >
 
     	<span  slot="edit" class="glyphicon glyphicon-pencil"></span>
@@ -57,9 +57,11 @@
 		placeholder="../dist/logo.png"
 		generator="test"
 		name="code"
-		source=""
+		source="../dist/logo.png"
 		download=""
 		:on-blur="true"
+		:is-editable="false"
+		:is-lightbox="true"
     >
 
     	<span  slot="edit" class="glyphicon glyphicon-pencil"></span>
