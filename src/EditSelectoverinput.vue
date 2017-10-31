@@ -2,7 +2,7 @@
     <span :class="{ error : fberror, done : fbdone }" class="edit-selectover" v-click-outside="leave" @mouseenter="showEditicon(true)" @mouseleave="showEditicon(false)">
     
         <span class="edit-selectover-content selector-item" v-show="editmode || !editmode" :class="[getSelectorClass, {'is-placeholder' : isPlaceholder}]" ref="content">
-            <component :is="templateComp" :item="getContent"></component>
+            <component :is="templateComp" :item="getContent" :hide="hidden & 1"></component>
         </span>
 
         <a v-if="!editmode" @click.stop="edit" v-show="isOver && isEditable">
@@ -14,7 +14,7 @@
         <ul class="selector-container" v-if="editmode" :style="position" ref="list">
             <li v-for="(item, i) in items" :class="['selector-item', classPrefix + keys[i], i === index ? 'active' : '']">
                 <a @click.prevent="clicked(i)">
-                    <component :is="templateComp" :item="item" :key="keys[i]"></component>
+                    <component :is="templateComp" :hide="hidden & 2" :item="item" :value="keys[i]"></component>
                 </a>
             </li>
         </ul>
@@ -46,6 +46,7 @@
             value : { default : ''},
             data: { }, // object or array or string (async-url)
             template : { type : String, default : null },
+            hidden : { type : Number, default : 0 }, // Text verstecken: 0 = alle zeigen, 1 = nur Auswahl, 2 = nur Liste, 3 = überall
             href : { type : String, default : '' },
             fbdelay : { type : Number, default : FBDELAY },
             callbackdone : { type : Function, default : function(message) { /*console.log(message);*/ }},
@@ -90,8 +91,9 @@
             },
             templateComp () {
                 return {
-                    template: typeof this.template === 'string' ? '<span>' + this.template + '</span>' : '<span v-html="item"></span>',
-                    props: { item: {default: ''} }
+                    template: typeof this.template === 'string' ? '<span>' + this.template + '</span>' : '<span v-show="!hide" :class="getKey" v-html="item"></span>',
+                    props: { item: {default: ''}, value : {default: ''}, hide : { default: false } },
+                    computed : { getKey() { return 'item-' + this.value }}
                 }
             }
         },
@@ -290,6 +292,7 @@
                 list-style-type: none;
                 a {
                     display:inline-block;
+                    white-space: nowrap;
                     width:100%;
                     padding:5px;
                     &:hover {

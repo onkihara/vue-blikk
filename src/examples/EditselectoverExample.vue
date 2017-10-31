@@ -4,6 +4,19 @@
 
     <hr />
 
+    <h5>Mit Data-Array und Template und verstecktem Text</h5>
+
+    <edit-selectover
+    	class="glyph-class"
+		value="drei"
+		placeholder="Auswählen ..."
+		:data="['eins','zwei','drei','vier']"
+		template='<span class="glyphicon"></span><span v-show="!hide" v-html="item"></span>'
+		:hidden="3"
+    ></edit-selectover>
+
+    <hr />
+
     <h5>Mit Data-Array und Template</h5>
 
     <edit-selectover
@@ -107,16 +120,9 @@
 		width:50%;
 		margin:auto;
 
-		.glyph-class .selector-container { 
-			/* min-width: 100%; */
-		}
-		.glyph-class {
+ 		.glyph-class {
 			.glyphicon { 
 				margin-right:7px; 
-				&:before {
-					position:relative;
-					top:1px;
-				}
 			}
 			.selectover-item-eins span.glyphicon:before { content: '\e033';	}
 			.selectover-item-zwei span.glyphicon:before { content: '\e034';	color: green; }
