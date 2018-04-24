@@ -16,8 +16,9 @@ import Example from './examples/EditlineExample.vue'
 import Example from './examples/GeoExample.vue'
 import Example from './examples/EditqrcodeExample.vue'
 import Example from './examples/EditdropdowninputExample.vue'
-*/
 import Example from './examples/EditselectoverExample.vue'
+*/
+import Example from './examples/EditRichareaExample.vue'
 
 new Vue({
   el: '#app',
