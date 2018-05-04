@@ -2,20 +2,27 @@
   <div id="app">
     <h1>{{ msg }}</h1>
 
-	<rich-area name="title">
-		Lorem ipsum <span style="color:red">dolor sit amet</span>, consectetur adipisicing elit. Id magnam aliquid rerum ipsa quas doloremque totam eum quod necessitatibus, reprehenderit eligendi, rem tempora dolore dolorem praesentium,<br />
-		<br />
-		dicta, nostrum similique blanditiis! Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ratione nobis unde adipisci vel repellat officiis magni sequi quisquam necessitatibus facere odio hic, blanditiis quae consequuntur, atque eaque voluptates eius enim.
-	</rich-area>
-
-	<hr />
-
-	<edit-area name="title">
-		Lorem ipsum <span style="color:red">dolor sit amet</span>, consectetur adipisicing elit. Id magnam aliquid rerum ipsa quas doloremque totam eum quod necessitatibus, reprehenderit eligendi, rem tempora dolore dolorem praesentium,<br />
+	<edit-area name="richeditarea" :init="richinit" :asset-url="assetUrl" height="300px" placeholder="Hier Text eingeben">
+		Zwei Burschen <span style="color:red">dolor sit amet</span>, consectetur adipisicing elit. Id magnam aliquid rerum ipsa quas doloremque totam eum quod necessitatibus, reprehenderit eligendi, rem tempora dolore dolorem praesentium,<br />
 		<br />
 		dicta, nostrum similique blanditiis! Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ratione nobis unde adipisci vel repellat officiis magni sequi quisquam necessitatibus facere odio hic, blanditiis quae consequuntur, atque eaque voluptates eius enim.
 	</edit-area>
 
+	<hr />
+
+	<edit-area name="richeditarea" :init="secondinit" :asset-url="assetUrl" height="300px" placeholder="Hier Text eingeben">
+		Zwei Burschen <span style="color:red">dolor sit amet</span>, consectetur adipisicing elit. Id magnam aliquid rerum ipsa quas doloremque totam eum quod necessitatibus, reprehenderit eligendi, rem tempora dolore dolorem praesentium,<br />
+		<br />
+		dicta, nostrum similique blanditiis! Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ratione nobis unde adipisci vel repellat officiis magni sequi quisquam necessitatibus facere odio hic, blanditiis quae consequuntur, atque eaque voluptates eius enim.
+	</edit-area>
+
+	<hr />
+
+	<rich-area name="first" :init="firstinit" :asset-url="assetUrl" width="600px" height="300px" placeholder="Hier Text eingeben">
+		Lorem ipsum <span style="color:red">dolor sit amet</span>, consectetur adipisicing elit. Id magnam aliquid rerum ipsa quas doloremque totam eum quod necessitatibus, reprehenderit eligendi, rem tempora dolore dolorem praesentium,<br />
+		<br />
+		dicta, nostrum similique blanditiis! Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ratione nobis unde adipisci vel repellat officiis magni sequi quisquam necessitatibus facere odio hic, blanditiis quae consequuntur, atque eaque voluptates eius enim.
+	</rich-area>
 
   </div>
 </template>
@@ -37,7 +44,28 @@
 		data () {
 			return {
 				msg: 'Rich-Editarea-Test',
-				content : ''
+				assetUrl : "/dist/tinymce/",
+				firstinit : {
+					//skin : 'charcoal',
+					language : 'de',
+					menubar : false,
+					plugins: 'paste, link',
+					toolbar : "bold italic | copy cut paste | styleselect | undo redo | link unlink image media",
+				},
+				richinit : {
+					skin : 'lightgray',
+					language : 'es',
+					menubar : false,
+					plugins: 'paste, link',
+					toolbar : "bold italic | copy cut paste | styleselect | undo redo | link unlink image media",
+				},
+				secondinit : {
+					skin : 'charcoal',
+					language : 'it',
+					menubar : false,
+					plugins: 'paste, link',
+					toolbar : "bold italic | copy cut paste | styleselect | link unlink image media",
+				}
 			}
 		}
 	}
@@ -45,6 +73,10 @@
 </script>
 
 <style lang="scss">
+
+	.rich-area > div{
+		margin:auto;
+	}
 	hr { margin:30px; }
 
 	#app {

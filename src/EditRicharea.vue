@@ -11,15 +11,19 @@
 
         <span class="charlimiter" :class="runningOut" v-if="limitChars > 0 && editmode" v-text="limit"></span>
 
-        <textarea 
+        <rich-area
+            :noinit="true"
+            :height="minHeight" 
+            :width="width"
+            :asset-url="assetUrl"
+            :init="init"
             ref="input" 
             v-if="editmode" 
             :placeholder="placeholder"
             @blur="leave" 
             @keydown.esc.stop="reset"
             @keyup="limitLength"
-            v-model="val" 
-        ></textarea>
+         ></rich-area>
 
     </span>
 </template>
@@ -29,6 +33,7 @@
     import Axios from 'axios';
     import _ from 'lodash';
     import Limitlength from './mixins/MixinLimitlength.js';
+    import Richarea from './Richarea.vue';
 
     const DELAY = 1000;
 
@@ -36,14 +41,21 @@
 
         mixins : [ Limitlength ],
 
-        props : {
+        components : {
+            'rich-area' : Richarea
+        },
+
+       props : {
             daoId : { type : Number, default : null },
             name : { type : String, default : 'name' },
             href : { type : String, default : '' },
             delay : { type : Number, default : DELAY },
-            value : { type : String },
+            width : { type : String, default : '' },
+            height : { type : String, default : '' },
             placeholder : { type : String, default : '' },
-            br : { type : Boolean, default: false }, // beware line-breaks <br />
+            // tinymce config vars
+            assetUrl : { type : String, default : ''},          // base url for skins und langs
+            init : { type: Object },                            // tinymce init-vars
             callbackdone : { type : Function, default : function(message) { /*console.log(message);*/ }},
             callbackerror : { type : Function, default : function(error) { console.log(error); }},
             onHover : { type : Boolean, default: true },
@@ -51,34 +63,36 @@
 
         data : function() {
             return {
-                val : this.value,
+                val : '',
                 old : '',
                 text : '',
                 editmode : false,
                 fberror : false,
                 fbdone : false,
-                height : 0,
+                minHeight : '',
                 isOver : ! this.onHover,
             }
         },
 
         mounted : function() {
             // adjust height
-            this.height = this.$refs.text.offsetHeight;
-            this.setPlaceholder();
+            this.val = this.$refs.text.innerHTML || '';
+            if (this.val != '') { 
+                this.minheight = this.$refs.text.offsetHeight + 'px';
+            } else {
+                this.$refs.text.innerHTML = '<span class="placeholder">'+this.placeholder+'</span>';
+                this.minHeight = this.height;
+            }
         },
 
         methods : {
-           setPlaceholder : function() {
-                if (this.val == '' && this.placeholder != '') {
-                    this.$refs.text.innerHTML = '<span class="placeholder">'+this.placeholder+'</span>';
-                }
-            },
             edit : function() {
                 this.editmode = true;
                 this.$nextTick(function() {
-                    this.$refs.input.style.minHeight = this.height + 'px';
-                    this.$refs.input.focus();
+                    this.$refs.input.inittinymce();
+                    this.$refs.input.setContent(this.val);
+                    //this.$refs.input.style.minHeight = this.minheight + 'px';
+                    //this.$refs.input.focus();
                 });
             },
             leave : function() {
