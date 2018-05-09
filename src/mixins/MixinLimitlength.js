@@ -19,10 +19,10 @@ export default {
 
     mounted : function() {
         // check for max length
-        this.limit = this.limit - this.$refs.text.textContent.trim().length;
+        this.limit = this.limit - this.getLength();
         if (this.limitChars > 0 && this.limit < 0) {
             this.limit = 0;
-            this.$refs.text.textContent = this.$refs.text.textContent.trim().substring(0,this.limitChars);
+            this.trimText();
         }
     },
 
@@ -38,7 +38,7 @@ export default {
     watch : {
         val(newVal) {
             if (this.limitChars == 0) return;
-            this.limit = this.limitChars - newVal.length;
+            this.limit = this.limitChars - this.getLength(newVal);
             if (this.limit < 0) this.limit = 0;
         }
     },
@@ -48,6 +48,12 @@ export default {
             if (this.limitChars > 0 && this.limit == 0) {
                 this.val = this.val.substring(0,this.limitChars);
             }
+        },
+        getLength : function(content) {
+            return content ? content.length : (this.$refs.text ? this.$refs.text.textContent.trim().length : 0);
+        },
+        trimText : function() {
+            this.$refs.text.textContent = this.$refs.text.textContent.trim().substring(0,this.limitChars);
         }
     }
 
