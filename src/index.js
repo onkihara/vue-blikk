@@ -2,6 +2,7 @@
 slideAway = require('./Slideaway.vue')
 taglist = require('./Taglist.vue')
 dropdown = require('./Dropdown.vue')
+modal = require('./Modal.vue')
 mapmodal = require('./Mapmodal.vue')
 geocoordinates = require('./Geocoordinates.vue')
 typeahead = require('./Typeahead.vue')
@@ -26,6 +27,7 @@ const VueBlikk = {
   slideAway,
   taglist,
   dropdown,
+  modal,
   mapmodal,
   geocoordinates,
   typeahead,

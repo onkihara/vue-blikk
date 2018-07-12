@@ -10,7 +10,7 @@
 
 	<hr />
 
-	<edit-area name="richeditarea" :file="true" :save="save_callback" :init="secondinit" :asset-url="assetUrl" height="300px" placeholder="Hier Text eingeben" href="./request.htm">
+	<edit-area name="richeditarea" :filepicker="true" :save="save_callback" :init="secondinit" :asset-url="assetUrl" height="300px" placeholder="Hier Text eingeben" href="./request.htm">
 		Zwei Burschen <span style="color:red">dolor sit amet</span>, consectetur adipisicing elit. Id magnam aliquid rerum ipsa quas doloremque totam eum quod necessitatibus, reprehenderit eligendi, rem tempora dolore dolorem praesentium,<br />
 		<br />
 		dicta, nostrum similique blanditiis! Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ratione nobis unde adipisci vel repellat officiis magni sequi quisquam necessitatibus facere odio hic, blanditiis quae consequuntur, atque eaque voluptates eius enim.
@@ -18,7 +18,7 @@
 
 	<hr />
 
-	<rich-area name="first" :file="true" :init="firstinit" :asset-url="assetUrl" width="600px" height="300px" placeholder="Hier Text eingeben">
+	<rich-area name="first" :filepicker="true" :init="firstinit" :asset-url="assetUrl" width="600px" height="300px" placeholder="Hier Text eingeben" filepicker-title="Datei wählen ...">
 		Lorem ipsum <span style="color:red">dolor sit amet</span>, consectetur adipisicing elit. Id magnam aliquid rerum ipsa quas doloremque totam eum quod necessitatibus, reprehenderit eligendi, rem tempora dolore dolorem praesentium,<br />
 		<br />
 		dicta, nostrum similique blanditiis! Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ratione nobis unde adipisci vel repellat officiis magni sequi quisquam necessitatibus facere odio hic, blanditiis quae consequuntur, atque eaque voluptates eius enim.

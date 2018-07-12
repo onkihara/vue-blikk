@@ -7,9 +7,11 @@
 
         <picker-modal class="picker-modal" v-model="mopen" ref="modal" @opened="mopened" @closed="mclosed" @cancel="mcancel">
 
-            <span slot="title"><slot name="title">File-Picker</slot></span>
+            <span slot="title"><slot name="title">{{ filepickerTitle }}</slot></span>
 
-            <div>Modal content!</div>
+            <div ref="picker">
+                <iframe v-if="filepicker===true" ref="pickerframe" :src="pickerurl"></iframe>
+            </div>
 
             <div slot="modal-footer" class="modal-footer"></div>
 
@@ -40,6 +42,11 @@
         },
 
         mounted : function() {
+            // set picker url
+            if (this.filepicker === true) {
+                this.pickerurl = '//' + window.location.host.split(':')[0] + '/filemanager/files';
+                window.addEventListener("message", this.insert, false);
+            }
             // initialize?
             if (this.noinit) {
                 return;
@@ -59,7 +66,10 @@
             init : { type: Object },                            // tinymce init-vars
             noinit : { type : Boolean, default: false },        // prevent outomatic init
             save : { type: Function, default: null },           // Callable Save-Function
-            file : { default: null },           // Callable File-Manager oder Boolean true für this.picker()
+            filepicker : { default: null },           // Callable File-Manager oder Boolean true für this.picker()
+            filepickerTitle : { type: String, default : 'File-Picker'},
+            filepickerinsert : { type : Function, default : null },
+
          },
 
         data : function() {
@@ -68,6 +78,7 @@
                 val : '',
                 editor : null,
                 mopen : false,
+                pickerurl : '',
             }
         },
 
@@ -102,15 +113,15 @@
                     }
                     // disable by default
                     initvars.save_enablewhendirty = initvars.save_enablewhendirty || false;
-                    initvars.save_onsavecallback = () => { this.save(this.editor); };
+                    initvars.save_onsavecallback = (() => { this.save(this.editor); });
                 }
                 // file
-                if (this.file) {
+                if (this.filepicker) {
                     initvars.file_picker_types = 'image, media, file';
-                    if (this.file === true) {
+                    if (this.filepicker === true) {
                         initvars.file_picker_callback = this.picker;
                     } else {
-                        initvars.file_picker_callback = this.file;
+                        initvars.file_picker_callback = this.filepicker;
                     }
                 }
                 // setup
@@ -150,8 +161,19 @@
                 // open modal
                 this.mopen = true;
 
+                // telling the iframe-picker the insertcallback (cross-origin-proof)
+                setTimeout(() => {
+                    this.$refs.pickerframe.contentWindow.postMessage('parent', '*');
+                }, 2000 );
+
+            },
+            insert(event) {
+                if (event.data.type && event.data.type == 'insert') {
+                    console.log(event.data.icon);
+                }
+
                 // Provide file and text for the link dialog
-                if (meta.filetype == 'file') {
+                /*if (meta.filetype == 'file') {
                   callback('mypage.html', {text: 'My text'});
                 }
 
@@ -163,7 +185,7 @@
                 // Provide alternative source and posted for the media dialog
                 if (meta.filetype == 'media') {
                   callback('movie.mp4', {source2: 'alt.ogg', poster: 'image.jpg'});
-                }
+                }*/
             },
             mopened() {
 
@@ -194,7 +216,22 @@
             margin-top:15px;
 
             .modal-content {
+
                 height:100%;
+
+                .modal-body {
+
+                    div {
+                        height:100%;
+                        iframe {
+                            border:0;
+                            width:100%;
+                            height:100%;
+                            position:relative;
+                        }
+                    }
+                    
+                }
             }
         }
 
