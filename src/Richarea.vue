@@ -9,8 +9,8 @@
 
             <span slot="title"><slot name="title">{{ filepickerTitle }}</slot></span>
 
-            <div ref="picker">
-                <iframe v-if="filepicker===true" ref="pickerframe" :src="pickerurl"></iframe>
+            <div v-if="mopen" ref="picker">
+                <iframe v-if="filepicker===true" ref="pickerframe" :src="pickersrc"></iframe>
             </div>
 
             <div slot="modal-footer" class="modal-footer"></div>
@@ -42,10 +42,14 @@
         },
 
         mounted : function() {
+            // message-listener
+            window.addEventListener("message", this.insert, false);
             // set picker url
             if (this.filepicker === true) {
-                this.pickerurl = '//' + window.location.host.split(':')[0] + '/filemanager/files';
-                window.addEventListener("message", this.insert, false);
+                this.pickerurl = 'https://' + window.location.host.split(':')[0] + '/filemanager/files';
+                //console.log(this.pickerurl)
+            } else if (_.isString(this.filepicker)) {
+                this.pickerurl = this.filepicker;
             }
             // initialize?
             if (this.noinit) {
@@ -66,9 +70,10 @@
             init : { type: Object },                            // tinymce init-vars
             noinit : { type : Boolean, default: false },        // prevent outomatic init
             save : { type: Function, default: null },           // Callable Save-Function
-            filepicker : { default: null },           // Callable File-Manager oder Boolean true für this.picker()
+            filepicker : { default: null },                     // Callable File-Manager oder Boolean true für this.picker()
             filepickerTitle : { type: String, default : 'File-Picker'},
             filepickerinsert : { type : Function, default : null },
+            parent : { type: String, default : 'parent' },
 
          },
 
@@ -79,6 +84,10 @@
                 editor : null,
                 mopen : false,
                 pickerurl : '',
+                pickersrc : '',
+                insertcallback : null,
+                meta : null,
+                value : null
             }
         },
 
@@ -158,34 +167,59 @@
                 });
             },
             picker(callback, value, meta) {
-                // open modal
+                this.meta = meta;
+                this.value = value;
+                this.insertcallback = callback;
+
+                // set iframe-src and open modal
+                this.pickersrc = this.pickerurl + '?context=' + this.parent + '&type=' + this.meta.filetype;
                 this.mopen = true;
-
-                // telling the iframe-picker the insertcallback (cross-origin-proof)
-                setTimeout(() => {
-                    this.$refs.pickerframe.contentWindow.postMessage('parent', '*');
-                }, 2000 );
-
             },
             insert(event) {
-                if (event.data.type && event.data.type == 'insert') {
-                    console.log(event.data.icon);
+                if (event.data.type && _.startsWith(this.pickerurl,event.origin)) {
+
+                    // insert command
+                    if (event.data.type != 'Filemanager-insert') {
+                        return;
+                    }
+
+                    let icon = event.data.icon;
+
+                    // Provide file and text for the link dialog
+                    if (this.meta.filetype == 'file') {
+                      this.insertcallback(icon.downurl, { text : icon.description, title : icon.description });
+                    }
+
+                    // Provide image and alt text for the image dialog
+                    if (this.meta.filetype == 'image') {
+                        // check viewable
+                        if (icon.type != 1) {
+                            return this.sendMessage('wrongtype');
+                        }
+                        this.insertcallback(icon.file, { alt : icon.description });
+                    }
+
+                    // Provide alternative source and posted for the media dialog
+                    if (this.meta.filetype == 'media') {
+                        // check mediable
+                        if (icon.type != 2) {
+                            return this.sendMessage('wrongtype');
+                        }
+                        this.insertcallback(icon.file, { 
+                            // source2: 'alt.ogg', 
+                            // poster: 'image.jpg'
+                        } );
+                    }
+
+                    this.mopen = false;
                 }
 
-                // Provide file and text for the link dialog
-                /*if (meta.filetype == 'file') {
-                  callback('mypage.html', {text: 'My text'});
+            },
+            sendMessage(type) {
+                if (this.$refs.pickerframe.contentWindow) {
+                    this.$refs.pickerframe.contentWindow.postMessage(
+                        { type: 'Filemanager-message', message : type}, this.pickerurl);
                 }
-
-                // Provide image and alt text for the image dialog
-                if (meta.filetype == 'image') {
-                  callback('myimage.jpg', {alt: 'My alt text'});
-                }
-
-                // Provide alternative source and posted for the media dialog
-                if (meta.filetype == 'media') {
-                  callback('movie.mp4', {source2: 'alt.ogg', poster: 'image.jpg'});
-                }*/
             },
             mopened() {
 
